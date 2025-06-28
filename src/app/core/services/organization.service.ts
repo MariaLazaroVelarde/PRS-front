@@ -1,9 +1,123 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { organization, organizationCreate, organizationUpdate, zones, zonesCreate, zonesUpdate, street, streetCreate, streetUpdate } from '../models/organization.model';
+import { map, Observable, tap } from 'rxjs';
+
+interface ApiResponse<T> {
+  status: boolean,
+  data: T
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrganizationService {
+  // Url de las apis organizations
+  private apiOrg = "";
+  private apiZon = "";
+  private apiStreet = ""
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
+
+  getAllO() {
+    return this.http.get<organization[]>(this.apiOrg);
+  }
+
+  getByIdO(id: string) {
+    return this.http.get<organization>(`${this.apiOrg}/${id}`);
+  }
+
+
+  saveO(organization: organizationCreate): Observable<organization> {
+    return this.http.post<ApiResponse<organization>>(this.apiOrg, organization).pipe(
+      map(response => response.data)
+    );
+  }
+
+  updateO(id: string, client: organizationUpdate): Observable<organization> {
+    return this.http.put<ApiResponse<organization>>(`${this.apiOrg}/${id}`, client).pipe(
+      map(response => response.data)
+    );
+  }
+
+
+  desactivateO(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/desactivate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
+  activateO(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/activate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
+  // Metode zones 
+
+  getAllZ() {
+    return this.http.get<zones[]>(this.apiZon);
+  }
+
+  getByIdZ(id: string) {
+    return this.http.get<zones>(`${this.apiZon}/${id}`);
+  }
+
+  saveZ(zone: zonesCreate): Observable<zones> {
+    return this.http.post<ApiResponse<zones>>(this.apiZon, zone).pipe(
+      map(response => response.data)
+    );
+  }
+
+  updateZ(id: string, zone: zonesUpdate): Observable<zones> {
+    return this.http.put<ApiResponse<zones>>(`${this.apiZon}/${id}`, zone).pipe(
+      map(response => response.data)
+    );
+  }
+
+  desactivateZ(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/desactivate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
+  activateZ(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/activate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
+  // Metode Street
+  getAllS() {
+    return this.http.get<street[]>(this.apiStreet);
+  }
+
+  getByIdS(id: string) {
+    return this.http.get<street>(`${this.apiStreet}/${id}`);
+  }
+
+  saveS(streetData: streetCreate): Observable<street> {
+    return this.http.post<ApiResponse<street>>(this.apiStreet, streetData).pipe(
+      map(response => response.data)
+    );
+  }
+
+  updateS(id: string, streetData: streetUpdate): Observable<street> {
+    return this.http.put<ApiResponse<street>>(`${this.apiStreet}/${id}`, streetData).pipe(
+      map(response => response.data)
+    );
+  }
+
+  desactivateS(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiStreet}/${id}/desactivate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
+  activateS(id: string): Observable<void> {
+    return this.http.patch<ApiResponse<void>>(`${this.apiStreet}/${id}/activate`, {}).pipe(
+      map(response => response.data)
+    );
+  }
+
 }

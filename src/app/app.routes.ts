@@ -46,7 +46,7 @@ export const APP_ROUTES: Routes = [
       },
       {
         path: 'incidents',
-        loadComponent: () => import('./modules/distribution/components/incident-list/incident-list.component').then(c => c.IncidentListComponent),
+        loadComponent: () => import('./modules/distribution/components/routes/incident-list.component').then(c => c.IncidentListComponent),
       },
       {
         path: 'complaints',

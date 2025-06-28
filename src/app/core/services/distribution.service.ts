@@ -33,11 +33,11 @@ export class DistributionService {
     return this.http.get<fares[]>(`${this.apiFares}/inactive`);
   }
 
-  getFById(id: string) {
+  getByIdF(id: string) {
     return this.http.get<fares>(`${this.apiFares}/${id}`);
   }
 
-  createFares(fares: faresCreate): Observable<fares> {
+  saveFares(fares: faresCreate): Observable<fares> {
     return this.http.post<ApiResponse<fares>>(this.apiFares, fares).pipe(
       map(response => response.data)
     );
@@ -50,13 +50,13 @@ export class DistributionService {
   }
 
 
-  deleteFares(id: string): Observable<void> {
+  deactivateFares(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiFares}/${id}/deactivate`, {}).pipe(
       map(response => response.data)
     );
   }
 
-  restoreFares(id: string): Observable<void> {
+  activateFares(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiFares}/${id}/activate`, {}).pipe(
       map(response => response.data)
     );
@@ -76,11 +76,11 @@ export class DistributionService {
     return this.http.get<schedules[]>(`${this.apiSchedules}/inactive`);
   }
 
-  getSById(id: string) {
+  getByIdS(id: string) {
     return this.http.get<schedules>(`${this.apiSchedules}/${id}`);
   }
 
-  createSchedules(schedules: schedulesCreate): Observable<schedules> {
+  saveSchedules(schedules: schedulesCreate): Observable<schedules> {
     return this.http.post<ApiResponse<schedules>>(this.apiSchedules, schedules).pipe(
       map(response => response.data)
     );
@@ -92,13 +92,13 @@ export class DistributionService {
     );
   }
 
-  deleteSchedules(id: string): Observable<void> {
+  deactivateSchedules(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiSchedules}/${id}/deactivate`, {}).pipe(
       map(response => response.data)
     );
   }
 
-  restoreSchedules(id: string): Observable<void> {
+  activateSchedules(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiSchedules}/${id}/activate`, {}).pipe(
       map(response => response.data)
     );
@@ -117,11 +117,11 @@ export class DistributionService {
     return this.http.get<routes[]>(`${this.apiRoutes}/inactive`);
   }
 
-  getRById(id: string) {
+  getByIdR(id: string) {
     return this.http.get<routes>(`${this.apiRoutes}/${id}`);
   }
 
-  createRoutes(routes: routesCreate): Observable<routes> {
+  saveRoutes(routes: routesCreate): Observable<routes> {
     return this.http.post<ApiResponse<routes>>(this.apiRoutes, routes).pipe(
       map(response => response.data)
     );
@@ -133,13 +133,13 @@ export class DistributionService {
     );
   }
 
-  deleteRoutes(id: string): Observable<void> {
+  deactivateRoutes(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiRoutes}/${id}/deactivate`, {}).pipe(
       map(response => response.data)
     );
   }
 
-  restoreRoutes(id: string): Observable<void> {
+  activateRoutes(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiRoutes}/${id}/activate`, {}).pipe(
       map(response => response.data)
     );

@@ -1,9 +1,10 @@
 export interface fares {
+    fareId: string
     organizationId: string;
     fareCode: string;
     fareName: string;
     fareType: FareType;
-    fareAmount: boolean;
+    fareAmount: number;
     status: Status;
     created_at: string
 }
@@ -12,14 +13,14 @@ export interface faresCreate {
     fareCode: string;
     fareName: string;
     fareType: FareType;
-    fareAmount: boolean
+    fareAmount: number
 }
 
 export interface faresUpdate {
     fareCode: string;
     fareName: string;
     fareType: FareType;
-    fareAmount: boolean
+    fareAmount: number
 }
 
 export enum FareType {
@@ -31,6 +32,7 @@ export enum FareType {
 
 // distribution schedules
 export interface schedules {
+    scheduleId: string;
     organizationId: string;
     scheduleCode: string;
     zoneId: string;
@@ -70,6 +72,7 @@ export enum DaysOfWeek {
 
 // distribution routes
 export interface routes {
+    routeId: string;
     organizationId: string;
     routeCode: string;
     routeName: string;
