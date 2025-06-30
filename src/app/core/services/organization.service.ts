@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { organization, organizationCreate, organizationUpdate, zones, zonesCreate, zonesUpdate, street, streetCreate, streetUpdate } from '../models/organization.model';
+import { organization, organizationCreate, organizationUpdate, zones, zonesCreate, zonesUpdate } from '../models/organization.model';
 import { map, Observable, tap } from 'rxjs';
 
 interface ApiResponse<T> {
@@ -13,9 +13,8 @@ interface ApiResponse<T> {
 })
 export class OrganizationService {
   // Url de las apis organizations
-  private apiOrg = "";
-  private apiZon = "";
-  private apiStreet = ""
+  private apiOrg = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/organizations";
+  private apiZon = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/zones";
 
   constructor(private http: HttpClient) { }
 
@@ -83,39 +82,6 @@ export class OrganizationService {
 
   activateZ(id: string): Observable<void> {
     return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/activate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
-
-  // Metode Street
-  getAllS() {
-    return this.http.get<street[]>(this.apiStreet);
-  }
-
-  getByIdS(id: string) {
-    return this.http.get<street>(`${this.apiStreet}/${id}`);
-  }
-
-  saveS(streetData: streetCreate): Observable<street> {
-    return this.http.post<ApiResponse<street>>(this.apiStreet, streetData).pipe(
-      map(response => response.data)
-    );
-  }
-
-  updateS(id: string, streetData: streetUpdate): Observable<street> {
-    return this.http.put<ApiResponse<street>>(`${this.apiStreet}/${id}`, streetData).pipe(
-      map(response => response.data)
-    );
-  }
-
-  desactivateS(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiStreet}/${id}/desactivate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
-
-  activateS(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiStreet}/${id}/activate`, {}).pipe(
       map(response => response.data)
     );
   }

@@ -14,7 +14,7 @@ interface ApiResponse<T> {
 export class DistributionService {
 
   // Url de las apis distributions
-  private apiFares = "";
+  private apiFares = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/fare";
   private apiSchedules = "";
   private apiRoutes = ""
 
@@ -25,7 +25,7 @@ export class DistributionService {
     return this.http.get<fares[]>(this.apiFares);
   }
 
-  ggetAllActiveF(): Observable<fares[]> {
+  getAllActiveF(): Observable<fares[]> {
     return this.http.get<fares[]>(`${this.apiFares}/active`);
   }
 
@@ -68,7 +68,7 @@ export class DistributionService {
     return this.http.get<schedules[]>(this.apiSchedules);
   }
 
-  ggetAllActiveS(): Observable<schedules[]> {
+  getAllActiveS(): Observable<schedules[]> {
     return this.http.get<schedules[]>(`${this.apiSchedules}/active`);
   }
 

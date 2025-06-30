@@ -46,7 +46,6 @@ export interface schedules {
 }
 
 export interface schedulesCreate {
-    scheduleCode: string;
     scheduleName: string;
     daysOfWeek: DaysOfWeek;
     startTime: boolean;
