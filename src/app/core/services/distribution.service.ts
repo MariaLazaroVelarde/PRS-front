@@ -111,44 +111,27 @@ getAll(): Observable<schedules[]> {
   }
 
    // MÉTODOS DE ROUTES
-  getAllR() {
-    return this.http.get<routes[]>(this.apiRoutes);
-  }
+ getAllR(): Observable<routes[]> {
+  return this.http.get<ApiResponse<routes[]>>(this.apiRoutes).pipe(
+    map(response => response.data)
+  );
+}
 
-  ggetAllActiveR(): Observable<routes[]> {
-    return this.http.get<routes[]>(`${this.apiRoutes}/active`);
-  }
+getAllActiveR(): Observable<routes[]> {
+  return this.http.get<ApiResponse<routes[]>>(`${this.apiRoutes}/active`).pipe(
+    map(response => response.data)
+  );
+}
 
-  getAllInactiveR(): Observable<routes[]> {
-    return this.http.get<routes[]>(`${this.apiRoutes}/inactive`);
-  }
+getAllInactiveR(): Observable<routes[]> {
+  return this.http.get<ApiResponse<routes[]>>(`${this.apiRoutes}/inactive`).pipe(
+    map(response => response.data)
+  );
+}
 
-  getByIdR(id: string) {
-    return this.http.get<routes>(`${this.apiRoutes}/${id}`);
-  }
-
-  saveRoutes(routes: routesCreate): Observable<routes> {
-    return this.http.post<ApiResponse<routes>>(this.apiRoutes, routes).pipe(
-      map(response => response.data)
-    );
-  }
-
-  updateRoutes(id: string, client: routesUpdate): Observable<routes> {
-    return this.http.put<ApiResponse<routes>>(`${this.apiRoutes}/${id}`, client).pipe(
-      map(response => response.data)
-    );
-  }
-
-  deactivateRoutes(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiRoutes}/${id}/deactivate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
-
-  activateRoutes(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiRoutes}/${id}/activate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
-
+getByIdR(id: string): Observable<routes> {
+  return this.http.get<ApiResponse<routes>>(`${this.apiRoutes}/${id}`).pipe(
+    map(response => response.data)
+  );
+}
 }

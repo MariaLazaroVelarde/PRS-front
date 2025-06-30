@@ -50,8 +50,8 @@ export const APP_ROUTES: Routes = [
         {
           path: 'routes',
           loadComponent: () =>
-            import('./modules/distribution/components/routes/incident-list.component')
-              .then(c => c.IncidentListComponent),
+            import('./modules/distribution/components/routes/routes-list/routes-list.component')
+              .then(c => c.RoutesListComponent),
         },
         {
           path: 'fares',
