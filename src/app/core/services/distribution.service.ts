@@ -14,16 +14,19 @@ interface ApiResponse<T> {
 export class DistributionService {
 
   // Url de las apis distributions
-  private apiFares = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/fare";
-  private apiSchedules = "";
-  private apiRoutes = ""
+  private apiFares = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/fare";
+  private apiSchedules = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/schedules";
+  private apiRoutes = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/routes"
 
   constructor(private http: HttpClient) { }
 
   // MÉTODOS DE FARES
-  getAllF() {
-    return this.http.get<fares[]>(this.apiFares);
-  }
+
+  getAllF(): Observable<fares[]> {
+  return this.http.get<ApiResponse<fares[]>>(this.apiFares).pipe(
+    map(response => response.data)
+  );
+}
 
   getAllActiveF(): Observable<fares[]> {
     return this.http.get<fares[]>(`${this.apiFares}/active`);
@@ -64,9 +67,12 @@ export class DistributionService {
 
 
   // MÉTODOS DE SCHEDULES
-  getAllS() {
-    return this.http.get<schedules[]>(this.apiSchedules);
-  }
+getAll(): Observable<schedules[]> {
+  return this.http.get<ApiResponse<schedules[]>>(this.apiSchedules).pipe(
+    map(res => res.data)
+  );
+}
+
 
   getAllActiveS(): Observable<schedules[]> {
     return this.http.get<schedules[]>(`${this.apiSchedules}/active`);

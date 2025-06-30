@@ -21,6 +21,12 @@ export class SidebarComponent implements OnInit {
   userRole: UserRole | null = null;
   UserRole = UserRole;
   isOrganizationsDropdownOpen: boolean = false;
+  isDistributionMenuOpen: boolean = false;
+
+toggleDistributionMenu(): void {
+  this.isDistributionMenuOpen = !this.isDistributionMenuOpen;
+}
+
   constructor(
     public authService: AuthService,
     private animationService: AnimationService,

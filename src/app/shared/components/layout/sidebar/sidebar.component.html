@@ -188,6 +188,31 @@
                         <span class="font-medium">Incidencias</span>
                     </a>
                 </li>
+                <li *ngIf="hasRole(UserRole.ADMIN)" class="group">
+  <div
+    class="flex items-center px-4 py-3 text-white cursor-pointer rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70"
+    (click)="toggleDistributionMenu()"
+  >
+    <div class="flex items-center justify-center w-10 h-10 mr-3 rounded-lg bg-sky-700/50 dark:bg-gray-600/50">
+      <i class="text-base fas fa-route text-sky-200 dark:text-gray-300"></i>
+    </div>
+    <span class="font-medium">Distribución</span>
+    <i class="ml-auto fas fa-chevron-down text-sky-300 dark:text-gray-300"></i>
+  </div>
+
+  <!-- Submenú -->
+  <ul *ngIf="isDistributionMenuOpen" class="ml-8 mt-2 space-y-2">
+    <li>
+      <a routerLink="/admin/distribution/routes" routerLinkActive="text-sky-400">Rutas</a>
+    </li>
+    <li>
+      <a routerLink="/admin/distribution/fares" routerLinkActive="text-sky-400">Tarifas</a>
+    </li>
+    <li>
+      <a routerLink="/admin/distribution/schedule" routerLinkActive="text-sky-400">Horario</a>
+    </li>
+  </ul>
+</li>
 
 
                 <li *ngIf="hasRole(UserRole.ADMIN)">

@@ -39,21 +39,25 @@ export class ScheduleListComponent implements OnInit {
     this.loadZones();
   }
 
-  loadSchedules() {
-    this.loading = true;
-    this.distributionService.getAllS().subscribe({
-      next: (data) => {
+loadSchedules(): void {
+  this.distributionService.getAll().subscribe({
+    next: (data: schedules[]) => {
+      if (Array.isArray(data)) {
         this.schedules = data;
-        this.filteredSchedules = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar horarios', err);
-        this.loading = false;
-        this.showAlertMessage('Error al cargar horarios', 'error');
+      } else {
+        console.warn('Formato inesperado al recibir schedules:', data);
+        this.schedules = [];
       }
-    });
-  }
+      this.applyFilters();
+    },
+    error: (err: any) => {
+      console.error('Error al cargar horarios', err);
+      this.schedules = [];
+    }
+  });
+}
+
+
 
   loadOrganizations() {
     this.organizationService.getAllO().subscribe({

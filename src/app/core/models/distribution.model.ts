@@ -110,3 +110,9 @@ export enum Status{
     ACTIVE ='ACTIVE',
     INACTIVE = 'INACTIVE'
 }
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  success?: boolean;
+}

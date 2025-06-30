@@ -38,21 +38,23 @@ export class FareListComponent implements OnInit {
     this.loadOrganizations();
   }
 
-  loadFares(): void {
-    this.loading = true;
-    this.distributionService.getAllF().subscribe({
-      next: (data) => {
-        this.fares = data;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar tarifas', err);
-        this.loading = false;
-        this.showAlertMessage('Error al cargar tarifas', 'error');
-      }
-    });
-  }
+loadFares(): void {
+  this.loading = true;
+  this.distributionService.getAllF().subscribe({
+    next: (data) => {
+      this.fares = data;
+      this.applyFilters();
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('Error al cargar tarifas', err);
+      this.loading = false;
+      this.showAlertMessage('Error al cargar tarifas', 'error');
+    }
+  });
+}
+
+
 
   loadOrganizations(): void {
     this.organizationService.getAllO().subscribe({

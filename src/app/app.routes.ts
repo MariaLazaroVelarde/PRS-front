@@ -44,10 +44,29 @@ export const APP_ROUTES: Routes = [
         path: 'payments',
         loadComponent: () => import('./modules/payments/components/payment-list/payment-list.component').then(c => c.PaymentListComponent),
       },
-      {
-        path: 'incidents',
-        loadComponent: () => import('./modules/distribution/components/routes/incident-list.component').then(c => c.IncidentListComponent),
-      },
+{
+      path: 'distribution',
+      children: [
+        {
+          path: 'routes',
+          loadComponent: () =>
+            import('./modules/distribution/components/routes/incident-list.component')
+              .then(c => c.IncidentListComponent),
+        },
+        {
+          path: 'fares',
+          loadComponent: () =>
+            import('./modules/distribution/components/fares/fares-list/fare-list.component')
+              .then(c => c.FareListComponent),
+        },
+        {
+          path: 'schedule',
+          loadComponent: () =>
+            import('./modules/distribution/components/schedule/schedule-list/schedule-list.component')
+              .then(c => c.ScheduleListComponent),
+        }
+      ]
+    },
       {
         path: 'complaints',
         loadComponent: () => import('./modules/complaints/components/complaint-list/complaint-list.component').then(c => c.ComplaintListComponent),
