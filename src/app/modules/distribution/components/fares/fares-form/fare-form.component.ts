@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import Swal from 'sweetalert2';
+
 import { fares, faresCreate, faresUpdate } from '../../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../../core/services/distribution.service';
 import { organization } from '../../../../../core/models/organization.model';
@@ -21,7 +21,8 @@ export class FareFormComponent implements OnInit {
   isEditMode: boolean = false;
   fareId: string = '';
   loading: boolean = false;
-  organizations: organization[] = []; 
+  organizations: organization[] = [];
+
   fareType = [
     { value: 'DIARIA', label: 'DIARIA' },
     { value: 'MENSUAL', label: 'MENSUAL' },
@@ -37,7 +38,7 @@ export class FareFormComponent implements OnInit {
   ) {
     this.fareForm = this.fb.group({
       organizationId: ['', Validators.required],
-       fareCode: ['', Validators.required], 
+      fareCode: [{ value: '', disabled: true }, Validators.required], // deshabilitado para que no se edite manualmente
       fareName: ['', [Validators.required, Validators.minLength(3)]],
       fareType: ['', Validators.required],
       fareAmount: ['', [Validators.required, Validators.min(0)]]
@@ -47,6 +48,31 @@ export class FareFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadOrganizations();
     this.checkEditMode();
+
+    if (!this.isEditMode) {
+      this.generateFareCode();
+    }
+  }
+
+  generateFareCode() {
+    this.distributionService.getAllF().subscribe({
+      next: (fares: fares[]) => {
+        const codes = fares
+          .map(f => f.fareCode)
+          .filter(code => code.startsWith('TAR'))
+          .map(code => parseInt(code.replace('TAR', ''), 10))
+          .filter(num => !isNaN(num));
+
+        const maxCode = codes.length > 0 ? Math.max(...codes) : 0;
+        const nextCode = `TAR${(maxCode + 1).toString().padStart(3, '0')}`;
+
+        this.fareForm.patchValue({ fareCode: nextCode });
+      },
+      error: (err: any) => {
+        console.error('Error al generar código de tarifa', err);
+        Swal.fire('Error', 'No se pudo generar el código de la tarifa', 'error');
+      }
+    });
   }
 
   loadOrganizations() {
@@ -76,7 +102,7 @@ export class FareFormComponent implements OnInit {
       next: (fare: fares) => {
         this.fareForm.patchValue({
           organizationId: fare.organizationId,
-            fareCode: fare.fareCode,
+          fareCode: fare.fareCode,
           fareName: fare.fareName,
           fareType: fare.fareType,
           fareAmount: fare.fareAmount
@@ -95,7 +121,9 @@ export class FareFormComponent implements OnInit {
   onSubmit() {
     if (this.fareForm.valid) {
       this.loading = true;
-      const formData = this.fareForm.value;
+      const formData = {
+        ...this.fareForm.getRawValue() // incluye fareCode aunque esté disabled
+      };
 
       if (this.isEditMode) {
         const updateData: faresUpdate = {
@@ -119,13 +147,13 @@ export class FareFormComponent implements OnInit {
           }
         });
       } else {
-const createData: faresCreate = {
-  organizationId: formData.organizationId, // ← ¡Este debe estar!
-  fareName: formData.fareName,
-  fareType: formData.fareType,
-  fareAmount: formData.fareAmount
-};
-
+        const createData: faresCreate = {
+          organizationId: formData.organizationId,
+          fareCode: formData.fareCode,
+          fareName: formData.fareName,
+          fareType: formData.fareType,
+          fareAmount: formData.fareAmount
+        };
 
         this.distributionService.saveFares(createData).subscribe({
           next: () => {
@@ -173,15 +201,9 @@ const createData: faresCreate = {
   getFieldError(fieldName: string): string {
     const field = this.fareForm.get(fieldName);
     if (field?.errors && field?.touched) {
-      if (field.errors['required']) {
-        return 'Este campo es requerido';
-      }
-      if (field.errors['min']) {
-        return 'El valor debe ser mayor o igual a 0';
-      }
-      if (field.errors['minlength']) {
-        return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
-      }
+      if (field.errors['required']) return 'Este campo es requerido';
+      if (field.errors['min']) return 'El valor debe ser mayor o igual a 0';
+      if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
     }
     return '';
   }

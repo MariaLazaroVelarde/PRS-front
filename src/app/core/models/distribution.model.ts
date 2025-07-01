@@ -11,10 +11,11 @@ export interface fares {
 
 
 export interface faresCreate {
-    organizationId: string;    
-    fareName: string;
-    fareType: FareType;
-    fareAmount: number;
+  organizationId: string;    
+  fareCode: string;         
+  fareName: string;
+  fareType: FareType;
+  fareAmount: number;
 }
 
 export interface faresUpdate {

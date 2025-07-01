@@ -12,6 +12,9 @@ interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class DistributionService {
+ getAllFares(): Observable<fares[]> {
+  return this.getAllF(); // ← usa internamente el método ya existente
+}
 
   // Url de las apis distributions
   private apiFares = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/fare";
