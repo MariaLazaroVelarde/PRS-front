@@ -1,19 +1,20 @@
 export interface fares {
-    fareId: string
-    organizationId: string;
-    fareCode: string;
+  id: string; // El ID que viene del backend
+  organizationId: string;
+  fareCode: string;
+  fareName: string;
+  fareType: FareType;
+  fareAmount: number;
+  status: 'ACTIVE' | 'INACTIVE';
+  created_at: string;
+}
+
+
+export interface faresCreate {
+    organizationId: string;    
     fareName: string;
     fareType: FareType;
     fareAmount: number;
-    status: Status;
-    created_at: string
-}
-
-export interface faresCreate {
-    fareCode: string;
-    fareName: string;
-    fareType: FareType;
-    fareAmount: number
 }
 
 export interface faresUpdate {

@@ -37,6 +37,7 @@ export class FareFormComponent implements OnInit {
   ) {
     this.fareForm = this.fb.group({
       organizationId: ['', Validators.required],
+       fareCode: ['', Validators.required], 
       fareName: ['', [Validators.required, Validators.minLength(3)]],
       fareType: ['', Validators.required],
       fareAmount: ['', [Validators.required, Validators.min(0)]]
@@ -75,6 +76,7 @@ export class FareFormComponent implements OnInit {
       next: (fare: fares) => {
         this.fareForm.patchValue({
           organizationId: fare.organizationId,
+            fareCode: fare.fareCode,
           fareName: fare.fareName,
           fareType: fare.fareType,
           fareAmount: fare.fareAmount
@@ -85,7 +87,7 @@ export class FareFormComponent implements OnInit {
         console.error('Error al cargar tarifa', err);
         this.loading = false;
         Swal.fire('Error', 'No se pudo cargar la tarifa', 'error');
-        this.router.navigate(['/super-admin/tarifas']);
+        this.router.navigate(['/admin/distribution/fares']);
       }
     });
   }
@@ -107,7 +109,7 @@ export class FareFormComponent implements OnInit {
           next: () => {
             this.loading = false;
             Swal.fire('Éxito', 'Tarifa actualizada correctamente', 'success').then(() => {
-              this.router.navigate(['/super-admin/tarifas']);
+              this.router.navigate(['/admin/distribution/fares']);
             });
           },
           error: (err) => {
@@ -117,18 +119,19 @@ export class FareFormComponent implements OnInit {
           }
         });
       } else {
-        const createData: faresCreate = {
-          fareCode: formData.fareCode,
-          fareName: formData.fareName,
-          fareType: formData.fareType,
-          fareAmount: formData.fareAmount
-        };
+const createData: faresCreate = {
+  organizationId: formData.organizationId, // ← ¡Este debe estar!
+  fareName: formData.fareName,
+  fareType: formData.fareType,
+  fareAmount: formData.fareAmount
+};
+
 
         this.distributionService.saveFares(createData).subscribe({
           next: () => {
             this.loading = false;
             Swal.fire('Éxito', 'Tarifa creada correctamente', 'success').then(() => {
-              this.router.navigate(['/super-admin/tarifas']);
+              this.router.navigate(['/admin/distribution/fares']);
             });
           },
           error: (err) => {
@@ -162,7 +165,7 @@ export class FareFormComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result: any) => {
       if (result.isConfirmed) {
-        this.router.navigate(['/super-admin/tarifas']);
+        this.router.navigate(['/admin/distribution/fares']);
       }
     });
   }

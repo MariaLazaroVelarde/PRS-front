@@ -22,23 +22,29 @@ export class DistributionService {
 
   // MÉTODOS DE FARES
 
-  getAllF(): Observable<fares[]> {
+getAllF(): Observable<fares[]> {
   return this.http.get<ApiResponse<fares[]>>(this.apiFares).pipe(
+    map(response => response.data) // ✅ aquí ya devuelves solo el array
+  );
+}
+
+getAllActiveF(): Observable<fares[]> {
+  return this.http.get<ApiResponse<fares[]>>(`${this.apiFares}/active`).pipe(
     map(response => response.data)
   );
 }
 
-  getAllActiveF(): Observable<fares[]> {
-    return this.http.get<fares[]>(`${this.apiFares}/active`);
-  }
+getAllInactiveF(): Observable<fares[]> {
+  return this.http.get<ApiResponse<fares[]>>(`${this.apiFares}/inactive`).pipe(
+    map(response => response.data)
+  );
+}
 
-  getAllInactiveF(): Observable<fares[]> {
-    return this.http.get<fares[]>(`${this.apiFares}/inactive`);
-  }
-
-  getByIdF(id: string) {
-    return this.http.get<fares>(`${this.apiFares}/${id}`);
-  }
+getByIdF(id: string): Observable<fares> {
+  return this.http.get<ApiResponse<fares>>(`${this.apiFares}/${id}`).pipe(
+    map(response => response.data)
+  );
+}
 
   saveFares(fares: faresCreate): Observable<fares> {
     return this.http.post<ApiResponse<fares>>(this.apiFares, fares).pipe(

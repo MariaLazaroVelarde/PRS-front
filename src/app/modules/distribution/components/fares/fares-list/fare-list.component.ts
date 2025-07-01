@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import Swal from 'sweetalert2';
+
 import { fares, Status } from '../../../../../core/models/distribution.model';
 import { organization } from '../../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
@@ -11,9 +12,9 @@ import { DistributionService } from '../../../../../core/services/distribution.s
 @Component({
   selector: 'app-fare-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './fare-list.component.html',
-  styleUrl: './fare-list.component.css'
+  styleUrls: ['./fare-list.component.css']
 })
 export class FareListComponent implements OnInit {
   fares: fares[] = [];
@@ -38,23 +39,25 @@ export class FareListComponent implements OnInit {
     this.loadOrganizations();
   }
 
-loadFares(): void {
-  this.loading = true;
-  this.distributionService.getAllF().subscribe({
-    next: (data) => {
-      this.fares = data;
-      this.applyFilters();
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('Error al cargar tarifas', err);
-      this.loading = false;
-      this.showAlertMessage('Error al cargar tarifas', 'error');
-    }
-  });
-}
+  loadFares(): void {
+    this.loading = true;
 
+    const request$ = this.selectedStatus === 'activo'
+      ? this.distributionService.getAllActiveF()
+      : this.distributionService.getAllInactiveF();
 
+    request$.subscribe({
+      next: (data) => {
+        this.fares = data;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar tarifas', err);
+        this.loading = false;
+      }
+    });
+  }
 
   loadOrganizations(): void {
     this.organizationService.getAllO().subscribe({
@@ -73,7 +76,7 @@ loadFares(): void {
   }
 
   onStatusChange(): void {
-    this.applyFilters();
+    this.loadFares();
   }
 
   private applyFilters(): void {
@@ -83,8 +86,10 @@ loadFares(): void {
         fare.fareName?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         fare.fareType?.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-      const matchesStatus = (this.selectedStatus === 'activo' && fare.status === Status.ACTIVE) ||
-        (this.selectedStatus === 'inactivo' && fare.status === Status.INACTIVE);
+      const matchesStatus =
+        (this.selectedStatus === 'activo' && fare.status === Status.ACTIVE) ||
+        (this.selectedStatus === 'inactivo' && fare.status === Status.INACTIVE) ||
+        this.selectedStatus === 'todos';
 
       return matchesSearch && matchesStatus;
     });
@@ -102,12 +107,9 @@ loadFares(): void {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.distributionService.deactivateFares(fare.fareId).subscribe({
+        this.distributionService.deactivateFares(fare.id).subscribe({
           next: () => {
-            const index = this.fares.findIndex(f => f.fareId === fare.fareId);
-            if (index !== -1) {
-              this.fares[index].status = Status.INACTIVE;
-            }
+            fare.status = Status.INACTIVE;
             this.applyFilters();
             this.showAlertMessage(`Tarifa ${fare.fareName} eliminada correctamente`, 'success');
           },
@@ -132,12 +134,9 @@ loadFares(): void {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.distributionService.activateFares(fare.fareId).subscribe({
+        this.distributionService.activateFares(fare.id).subscribe({
           next: () => {
-            const index = this.fares.findIndex(f => f.fareId === fare.fareId);
-            if (index !== -1) {
-              this.fares[index].status = Status.ACTIVE;
-            }
+            fare.status = Status.ACTIVE;
             this.applyFilters();
             this.showAlertMessage(`Tarifa ${fare.fareName} restaurada correctamente`, 'success');
           },
@@ -151,18 +150,18 @@ loadFares(): void {
   }
 
   editFare(fareId: string): void {
-    this.router.navigate(['/super-admin/distribution/fares/edit', fareId]);
+    this.router.navigate(['/admin/distribution/fares/edit', fareId]);
   }
 
   addNewFare(): void {
-    this.router.navigate(['/super-admin/distribution/fares/new']);
+    this.router.navigate(['/admin/distribution/fares/new']);
   }
 
-  getStatusClass(status: Status): string {
+  getStatusClass(status: string): string {
     return status === Status.ACTIVE ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   }
 
-  getStatusLabel(status: Status): string {
+  getStatusLabel(status: string): string {
     return status === Status.ACTIVE ? 'Activo' : 'Inactivo';
   }
 
@@ -184,7 +183,7 @@ loadFares(): void {
   }
 
   trackByFareId(index: number, fare: fares): string {
-    return fare.fareId;
+    return fare.id;
   }
 
   private showAlertMessage(message: string, type: 'success' | 'error' | 'info' = 'success'): void {
