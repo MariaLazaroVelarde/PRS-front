@@ -120,7 +120,7 @@ export class ScheduleListComponent implements OnInit {
       cancelButtonColor: '#3085d6'
     }).then(result => {
       if (result.isConfirmed) {
-        this.distributionService.deactivateSchedules(schedule.scheduleCode).subscribe({
+        this.distributionService.deactivateSchedules(schedule.id).subscribe({
           next: () => {
             schedule.status = Status.INACTIVE;
             this.applyFilters();
@@ -147,7 +147,7 @@ export class ScheduleListComponent implements OnInit {
       cancelButtonColor: '#6c757d'
     }).then(result => {
       if (result.isConfirmed) {
-        this.distributionService.activateSchedules(schedule.scheduleCode).subscribe({
+        this.distributionService.activateSchedules(schedule.id).subscribe({
           next: () => {
             schedule.status = Status.ACTIVE;
             this.applyFilters();

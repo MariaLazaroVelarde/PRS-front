@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { fares, faresCreate, faresUpdate, schedules, schedulesCreate, schedulesUpdate, routes, routesCreate, routesUpdate } from '../models/distribution.model';
-import { map, Observable, tap } from 'rxjs';
+import { fares, faresCreate, faresUpdate, schedules, schedulesCreate, schedulesUpdate, routes } from '../models/distribution.model';
+import { map, Observable } from 'rxjs';
 
 interface ApiResponse<T> {
   status: boolean,
@@ -20,10 +20,10 @@ export class DistributionService {
 }
 
   // Url de las apis distributions
-  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/fare";
-  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/schedules";
-  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/routes"
-
+  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/fare";
+  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/schedules";
+  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/routes"
+ 
   constructor(private http: HttpClient) { }
 
   // MÉTODOS DE FARES

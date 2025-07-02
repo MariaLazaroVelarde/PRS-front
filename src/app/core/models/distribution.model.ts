@@ -74,7 +74,6 @@ export enum DaysOfWeek {
     VIERNES = 'VIERNES'
 }
 
-
 // distribution routes
 export interface routes {
     routeId: string;

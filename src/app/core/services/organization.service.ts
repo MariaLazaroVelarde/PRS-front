@@ -13,8 +13,8 @@ interface ApiResponse<T> {
 })
 export class OrganizationService {
   // Url de las apis organizations
-  private apiOrg = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/organizations";
-  private apiZon = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/zones";
+  private apiOrg = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/organizations";
+  private apiZon = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/zones";
 
   constructor(private http: HttpClient) { }
 

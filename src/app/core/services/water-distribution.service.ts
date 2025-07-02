@@ -1,50 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { programs, programsCreate, programsUpdate } from '../models/water-distribution.model';
+import { map, Observable } from 'rxjs';
+import { DistributionProgram, DistributionProgramCreate, DistributionProgramUpdate } from '../models/water-distribution.model';
+import { ApiResponse } from '../models/distribution.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgramsService {
 
-  private readonly baseUrl = 'https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/programs'; // Cambia esta URL a la de tu backend
+  private readonly apiPrograms = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/programs"
 
   constructor(private http: HttpClient) { }
 
-  // Obtener todos los programas
-  getAll(): Observable<programs[]> {
-    return this.http.get<programs[]>(this.baseUrl);
+ // MÉTODOS DE PROGRAMS
+
+  getAllPrograms(): Observable<DistributionProgram[]> {
+    return this.http.get<ApiResponse<DistributionProgram[]>>(this.apiPrograms).pipe(
+      map((response: { data: any; }) => response.data)
+    );
   }
 
-  // Obtener un programa por ID
-  getById(id: string): Observable<programs> {
-    return this.http.get<programs>(`${this.baseUrl}/${id}`);
+  getProgramById(id: string): Observable<DistributionProgram> {
+    return this.http.get<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
-  // Crear un nuevo programa
-  create(program: programsCreate): Observable<programs> {
-    return this.http.post<programs>(this.baseUrl, program);
+  createProgram(program: DistributionProgramCreate): Observable<DistributionProgram> {
+    return this.http.post<ApiResponse<DistributionProgram>>(this.apiPrograms, program).pipe(
+      map(response => response.data)
+    );
   }
 
-  // Actualizar un programa existente
-  update(id: string, program: programsUpdate): Observable<programs> {
-    return this.http.put<programs>(`${this.baseUrl}/${id}`, program);
+  updateProgram(id: string, program: DistributionProgramUpdate): Observable<DistributionProgram> {
+    return this.http.put<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}`, program).pipe(
+      map(response => response.data)
+    );
   }
 
-  // Eliminar un programa
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deleteProgram(id: string): Observable<void> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiPrograms}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
-  // Desactivar un programa
-  deactivate(id: string): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${id}/deactivate`, {});
+  activateProgram(id: string): Observable<DistributionProgram> {
+    return this.http.patch<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}/activate`, {}).pipe(
+      map(response => response.data)
+    );
   }
 
-  // Activar un programa
-  activate(id: string): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${id}/activate`, {});
+  deactivateProgram(id: string): Observable<DistributionProgram> {
+    return this.http.patch<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}/deactivate`, {}).pipe(
+      map(response => response.data)
+    );
   }
-
 }

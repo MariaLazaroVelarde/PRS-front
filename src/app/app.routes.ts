@@ -53,7 +53,15 @@ export const APP_ROUTES: Routes = [
         import('./modules/distribution/components/routes/routes-list/routes-list.component')
           .then(c => c.RoutesListComponent),
     },
-    // fares no se toca ya que funciona bien
+{
+  path: 'programs',
+  loadComponent: () =>
+    import('./modules/water-distribution/components/program-list/program-list.component')
+      .then(c => c.ProgramListComponent),
+}
+,
+
+
     {
       path: 'fares',
       children: [

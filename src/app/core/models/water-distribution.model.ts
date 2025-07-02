@@ -1,63 +1,41 @@
 import { organization } from "./organization.model";
 import { schedules, routes } from "./distribution.model";
 
-// DISTRIBUTION PROGRAMS
-export interface programs {
-  id: string, // El ID que viene del backend
-  organizationId: string,
-  programCode: string,
-  scheduleId: string,
-  routeId: string,
-  programDate: Date,
-  plannedStartTime: string,
-  plannedEndTime: string,
-  actualStartTime: string,
-  actualEndTime: string,
-  status: StatusPrograms,
-  responsibleUserId: string,
-  observations: string,
-  createdAt: string
+// distribution programas
+export interface DistributionProgram {
+  id: string;
+  organizationId: string;
+  programCode: string;
+  scheduleId: string;
+  routeId: string;
+  programDate: string; // formato YYYY-MM-DD
+  plannedStartTime: string; // "08:00"
+  plannedEndTime: string;
+  actualStartTime?: string | null;
+  actualEndTime?: string | null;
+  status: ProgramStatus;
+  responsibleUserId: string;
+  observations?: string;
+  createdAt: string;
 }
 
-export interface programsCreate {
-  organizationId: string,
-  programCode: string,
-  scheduleId: string,
-  routeId: string,
-  programDate: Date,
-  plannedStartTime: string,
-  plannedEndTime: string,
-  actualStartTime: string,
-  actualEndTime: string,
-  status: StatusPrograms,
-  responsibleUserId: string,
-  observations: string
+export interface DistributionProgramCreate {
+  organizationId: string;
+  scheduleId: string;
+  routeId: string;
+  programDate: string;
+  plannedStartTime: string;
+  plannedEndTime: string;
+  responsibleUserId: string;
+  observations?: string;
 }
 
-export interface programsUpdate {
-  organizationId: string,
-  programCode: string,
-  scheduleId: string,
-  routeId: string,
-  programDate: Date,
-  plannedStartTime: string,
-  plannedEndTime: string,
-  actualStartTime: string,
-  actualEndTime: string,
-  status: StatusPrograms,
-  responsibleUserId: string,
-  observations: string
-}
+export interface DistributionProgramUpdate extends DistributionProgramCreate {}
 
-export enum StatusPrograms {
-  COMPLETED = 'COMPLETED',
+export enum ProgramStatus {
   PLANNED = 'PLANNED',
   IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED'
 }
 
-export interface DistributionProgramView extends programs {
-  schedule?: schedules;
-  route?: routes;
-  organization?: organization;
-}

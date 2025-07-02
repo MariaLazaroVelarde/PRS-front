@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { programs } from '../../../../core/models/water-distribution.model';
+import { DistributionProgram } from '../../../../core/models/water-distribution.model';
 import { routes, schedules } from '../../../../core/models/distribution.model';
 import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { DistributionService } from '../../../../core/services/distribution.service';
@@ -13,10 +13,9 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-
 export class ProgramListComponent implements OnInit {
-  programs: programs[] = [];
-  filteredPrograms: programs[] = [];
+  programs: DistributionProgram[] = [];
+  filteredPrograms: DistributionProgram[] = [];
   routes: routes[] = [];
   schedules: schedules[] = [];
   loading = false;
@@ -40,7 +39,7 @@ export class ProgramListComponent implements OnInit {
 
   private loadPrograms(): void {
     this.loading = true;
-    this.programsService.getAll().subscribe({
+    this.programsService.getAllPrograms().subscribe({
       next: (programList) => {
         this.programs = programList;
         this.filteredPrograms = programList;
@@ -66,7 +65,7 @@ export class ProgramListComponent implements OnInit {
       error: (error: any) => console.error('Error al cargar horarios:', error)
     });
   }
-  
+
   onSearch(): void {
     this.filterPrograms();
   }
@@ -131,7 +130,7 @@ export class ProgramListComponent implements OnInit {
     this.router.navigate(['/admin/distribution/programNew']);
   }
 
-  trackByProgramsId(index: number, program: programs): string {
+  trackByProgramsId(index: number, program: DistributionProgram): string {
     return program.id;
   }
 
@@ -140,9 +139,9 @@ export class ProgramListComponent implements OnInit {
     return route ? route.routeName : routeId;
   }
 
-  getScheduleName(scheduleId: string): string {
-    const schedule = this.schedules.find(s => s.scheduleId === scheduleId);
-    return schedule ? schedule.scheduleName : scheduleId;
+  getScheduleName(scheduleCode: string): string {
+    const schedule = this.schedules.find(s => s.scheduleCode === scheduleCode);
+    return schedule ? schedule.scheduleName : scheduleCode;
   }
 
   dismissAlert(): void {
@@ -155,5 +154,4 @@ export class ProgramListComponent implements OnInit {
     this.alertType = 'error';
     this.alertMessage = message;
   }
-
 }
