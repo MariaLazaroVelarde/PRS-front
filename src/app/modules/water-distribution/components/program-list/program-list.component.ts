@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DistributionProgram } from '../../../../core/models/water-distribution.model';
-import { routes, schedules } from '../../../../core/models/distribution.model';
+import { ApiResponse, routes, schedules, User } from '../../../../core/models/distribution.model';
 import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-program-list',
@@ -14,10 +14,13 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule]
 })
 export class ProgramListComponent implements OnInit {
+  [x: string]: any;
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
   routes: routes[] = [];
   schedules: schedules[] = [];
+  usersMap = new Map<string, string>();
+  responsibleUsers: User[] = [];
   loading = false;
   showAlert = false;
   alertType: 'success' | 'error' | 'info' = 'info';
@@ -35,6 +38,8 @@ export class ProgramListComponent implements OnInit {
     this.loadPrograms();
     this.loadRoutes();
     this.loadSchedules();
+    this.loadResponsibleUsers();
+    this.loadUsers();
   }
 
   private loadPrograms(): void {
@@ -45,10 +50,7 @@ export class ProgramListComponent implements OnInit {
         this.filteredPrograms = programList;
         this.loading = false;
       },
-      error: (error) => {
-        this.handleError('Error al cargar los programas', error);
-        this.loading = false;
-      }
+      error: (error) => this.handleError('Error al cargar los programas', error)
     });
   }
 
@@ -66,36 +68,30 @@ export class ProgramListComponent implements OnInit {
     });
   }
 
-  onSearch(): void {
-    this.filterPrograms();
-  }
-
-  onStatusChange(): void {
-    this.filterPrograms();
-  }
-
-  private filterPrograms(): void {
-    this.filteredPrograms = this.programs.filter(program => {
-      const matchesSearch = !this.searchTerm ||
-        program.programCode.toLowerCase().includes(this.searchTerm.toLowerCase());
-
-      const matchesStatus = this.selectedStatus === 'todos' ||
-        program.status === this.selectedStatus;
-
-      return matchesSearch && matchesStatus;
+  private loadUsers(): void {
+    this.distributionService.getAllUsers().subscribe({
+      next: (data: any[]) => {
+        data.forEach(user => {
+          this.usersMap.set(user.id, user.name || `${user.firstName} ${user.lastName}` || 'Nombre desconocido');
+        });
+      },
+      error: (error: any) => console.error('Error al cargar usuarios:', error)
     });
   }
 
-  getAcceptableProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'COMPLETED').length;
+  getRouteName(routeId: string): string {
+    const route = this.routes.find(r => r.id === routeId);
+    return route ? route.routeName : `Ruta desconocida (${routeId})`;
   }
 
-  getWarningProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'IN_PROGRESS').length;
+  
+  getScheduleName(scheduleId: string): string {
+    const schedule = this.schedules.find(s => s.id === scheduleId);
+    return schedule ? schedule.scheduleName : `Horario desconocido (${scheduleId})`;
   }
 
-  getCriticalProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'CANCELLED').length;
+  getUserName(userId: string): string {
+    return this.usersMap.get(userId) || `Usuario desconocido (${userId})`;
   }
 
   getStatusText(status: string): string {
@@ -118,6 +114,59 @@ export class ProgramListComponent implements OnInit {
     }
   }
 
+  onSearch(): void {
+    this.filterPrograms();
+  }
+
+  onStatusChange(): void {
+    this.filterPrograms();
+  }
+
+  private filterPrograms(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredPrograms = this.programs.filter(program => {
+      const matchesSearch = !term || program.programCode.toLowerCase().includes(term);
+      const matchesStatus = this.selectedStatus === 'todos' || program.status === this.selectedStatus;
+      return matchesSearch && matchesStatus;
+    });
+  }
+
+  getAcceptableProgramsCount(): number {
+    return this.programs.filter(p => p.status === 'COMPLETED').length;
+  }
+  
+loadResponsibleUsers(): void {
+  this.distributionService.getResponsibleUsers().subscribe({
+    next: (response: ApiResponse<User[]> | null) => {
+      if (response && response.data) {
+        this.responsibleUsers = response.data;
+      } else {
+        this.responsibleUsers = []; // ← seguridad extra
+      }
+    },
+    error: (error: any) => {
+      console.error('Error cargando responsables', error);
+      this.responsibleUsers = [];
+    }
+  });
+}
+
+
+
+getResponsibleName(userId: string): string {
+  const user = this.responsibleUsers.find(u => u.id === userId);
+  return user ? user.name : '—';
+}
+
+
+  getWarningProgramsCount(): number {
+    return this.programs.filter(p => p.status === 'IN_PROGRESS').length;
+  }
+
+  getCriticalProgramsCount(): number {
+    return this.programs.filter(p => p.status === 'CANCELLED').length;
+  }
+
   viewProgramsDetail(id: string): void {
     this.router.navigate(['/admin/distribution/programDetail', id]);
   }
@@ -126,22 +175,13 @@ export class ProgramListComponent implements OnInit {
     this.router.navigate(['/admin/distribution/programEdit', id]);
   }
 
-  addNewPrograms(): void {
-    this.router.navigate(['/admin/distribution/programNew']);
-  }
+addNewPrograms(): void {
+  this.router.navigate(['/programs/new']);
+}
+
 
   trackByProgramsId(index: number, program: DistributionProgram): string {
     return program.id;
-  }
-
-  getRouteName(routeId: string): string {
-    const route = this.routes.find(r => r.routeId === routeId);
-    return route ? route.routeName : routeId;
-  }
-
-  getScheduleName(scheduleCode: string): string {
-    const schedule = this.schedules.find(s => s.scheduleCode === scheduleCode);
-    return schedule ? schedule.scheduleName : scheduleCode;
   }
 
   dismissAlert(): void {
@@ -150,6 +190,7 @@ export class ProgramListComponent implements OnInit {
 
   private handleError(message: string, error: any): void {
     console.error('Error:', error);
+    this.loading = false;
     this.showAlert = true;
     this.alertType = 'error';
     this.alertMessage = message;

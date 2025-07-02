@@ -76,6 +76,7 @@ export enum DaysOfWeek {
 
 // distribution routes
 export interface routes {
+    id: string;
     routeId: string;
     organizationId: string;
     routeCode: string;
@@ -120,4 +121,57 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   success?: boolean;
+}
+
+// Usuario
+export interface User {
+  id: string;
+  name: string;
+}
+
+// Programas de distribución
+
+export interface DistributionProgramCreate {
+  programCode: string;
+  organizationId: string;
+  scheduleId: string;
+  routeId: string;
+  programDate: string; // formato: YYYY-MM-DD
+  plannedStartTime: string; // formato: HH:mm
+  plannedEndTime: string;
+  actualStartTime: string;
+  actualEndTime: string;
+  responsibleUserId: string;
+  observations?: string;
+  status: Status;
+}
+
+export interface DistributionProgram {
+  id: string;
+  programCode: string;
+  organizationId: string;
+  scheduleId: string;
+  routeId: string;
+  programDate: string;
+  plannedStartTime: string;
+  plannedEndTime: string;
+  actualStartTime?: string;
+  actualEndTime?: string;
+  responsibleUserId: string;
+  observations?: string;
+  status: Status;
+  created_at: string;
+}
+
+export interface DistributionProgramUpdate {
+  scheduleId?: string;
+  routeId?: string;
+  programDate?: string;
+  plannedStartTime?: string;
+  plannedEndTime?: string;
+  actualStartTime?: string;
+  actualEndTime?: string;
+  responsibleUserId?: string;
+  observations?: string;
+  status?: Status;
 }

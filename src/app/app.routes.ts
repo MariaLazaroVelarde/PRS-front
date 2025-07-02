@@ -58,10 +58,13 @@ export const APP_ROUTES: Routes = [
   loadComponent: () =>
     import('./modules/water-distribution/components/program-list/program-list.component')
       .then(c => c.ProgramListComponent),
-}
-,
-
-
+},
+{
+  path: 'programs/new',
+  loadComponent: () =>
+    import('./modules/water-distribution/components/program-form/program-form.component')
+      .then(c => c.ProgramFormComponent),
+},
     {
       path: 'fares',
       children: [

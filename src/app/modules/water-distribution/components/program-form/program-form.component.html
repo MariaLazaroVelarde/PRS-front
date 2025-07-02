@@ -1,1 +1,93 @@
-<p>quality-records works!</p>
+<form [formGroup]="form" ...
+ (ngSubmit)="onSubmit()"
+  class="space-y-4 max-w-xl mx-auto p-4 bg-white shadow-md rounded">
+  
+  <!-- Organización -->
+  <div>
+    <label>Organización</label>
+    <select formControlName="organizationId" class="form-select w-full">
+      <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
+    </select>
+  </div>
+
+ <!-- Código del Programa (Autogenerado) -->
+<div>
+  <label>Código del Programa</label>
+  <input type="text" formControlName="programCode" class="form-input w-full bg-gray-100" readonly />
+</div>
+
+
+  <!-- Horario -->
+  <div>
+    <label>Horario</label>
+    <select formControlName="scheduleId" class="form-select w-full">
+      <option *ngFor="let s of schedules" [value]="s.id">{{ s.scheduleCode }}</option>
+    </select>
+  </div>
+
+  <!-- Ruta -->
+  <div>
+    <label>Ruta</label>
+    <select formControlName="routeId" class="form-select w-full">
+      <option *ngFor="let r of routes" [value]="r.id">{{ r.routeCode }}</option>
+    </select>
+  </div>
+
+  <!-- Fecha -->
+  <div>
+    <label>Fecha del Programa</label>
+    <input type="date" formControlName="programDate" class="form-input w-full" />
+  </div>
+
+  <!-- Hora de Inicio (Planificada) -->
+  <div>
+    <label>Hora de Inicio (Planificada)</label>
+    <input type="time" formControlName="plannedStartTime" class="form-input w-full" />
+  </div>
+
+  <!-- Hora de Fin (Planificada) -->
+  <div>
+    <label>Hora de Fin (Planificada)</label>
+    <input type="time" formControlName="plannedEndTime" class="form-input w-full" />
+  </div>
+
+  <!-- Hora de Inicio (Real) -->
+  <div>
+    <label>Hora de Inicio (Real)</label>
+    <input type="time" formControlName="actualStartTime" class="form-input w-full" />
+  </div>
+
+  <!-- Hora de Fin (Real) -->
+  <div>
+    <label>Hora de Fin (Real)</label>
+    <input type="time" formControlName="actualEndTime" class="form-input w-full" />
+  </div>
+
+  <!-- Estado -->
+  <div>
+    <label>Estado</label>
+    <select formControlName="status" class="form-select w-full">
+      <option value="PENDING">Pendiente</option>
+      <option value="IN_PROGRESS">En Progreso</option>
+      <option value="COMPLETED">Completado</option>
+    </select>
+  </div>
+
+  <!-- Responsable -->
+  <div>
+    <label>Responsable</label>
+    <select formControlName="responsibleUserId" class="form-select w-full">
+      <option *ngFor="let u of responsibleUsers" [value]="u.id">{{ u.fullName }}</option>
+    </select>
+  </div>
+
+  <!-- Observaciones -->
+  <div>
+    <label>Observaciones</label>
+    <textarea formControlName="observations" class="form-textarea w-full"></textarea>
+  </div>
+
+  <!-- Botón Guardar -->
+  <button type="submit"
+    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Guardar</button>
+</form>

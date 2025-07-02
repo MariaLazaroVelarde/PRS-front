@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { fares, faresCreate, faresUpdate, schedules, schedulesCreate, schedulesUpdate, routes } from '../models/distribution.model';
+import { fares, faresCreate, faresUpdate, schedules, schedulesCreate, schedulesUpdate, routes, User, DistributionProgram, DistributionProgramUpdate, DistributionProgramCreate } from '../models/distribution.model';
 import { map, Observable } from 'rxjs';
 
 interface ApiResponse<T> {
@@ -19,18 +19,34 @@ export class DistributionService {
   return this.getAllF(); // ← usa internamente el método ya existente
 }
 
+// distribution.service.ts
+
   // Url de las apis distributions
-  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/fare";
-  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/schedules";
-  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/routes"
- 
+  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/fare";
+  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/schedules";
+  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/routes"
+  private apiUrl = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/users"
+  private readonly apiPrograms = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/programs"
+
+  
   constructor(private http: HttpClient) { }
+
+   getAllUsers(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(this.apiUrl).pipe(
+      map(response => response.data)
+    );
+  }
+
+  getResponsibleUsers(): Observable<ApiResponse<User[]>> {
+  return this.http.get<ApiResponse<User[]>>(`${this.apiUrl}/responsible-users`);
+}
+
 
   // MÉTODOS DE FARES
 
 getAllF(): Observable<fares[]> {
   return this.http.get<ApiResponse<fares[]>>(this.apiFares).pipe(
-    map(response => response.data) // ✅ aquí ya devuelves solo el array
+    map(response => response.data) 
   );
 }
 
@@ -76,6 +92,50 @@ getByIdF(id: string): Observable<fares> {
       map(response => response.data)
     );
   }
+
+// MÉTODOS DE PROGRAMS
+
+getAllPrograms(): Observable<DistributionProgram[]> {
+  return this.http.get<ApiResponse<DistributionProgram[]>>(this.apiPrograms).pipe(
+    map(response => response.data)
+  );
+}
+
+getProgramById(id: string): Observable<DistributionProgram> {
+  return this.http.get<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}`).pipe(
+    map(response => response.data)
+  );
+}
+
+createProgram(program: DistributionProgramCreate): Observable<DistributionProgram> {
+  return this.http.post<ApiResponse<DistributionProgram>>(this.apiPrograms, program).pipe(
+    map(response => response.data)
+  );
+}
+
+updateProgram(id: string, program: DistributionProgramUpdate): Observable<DistributionProgram> {
+  return this.http.put<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}`, program).pipe(
+    map(response => response.data)
+  );
+}
+
+deleteProgram(id: string): Observable<void> {
+  return this.http.delete<ApiResponse<void>>(`${this.apiPrograms}/${id}`).pipe(
+    map(response => response.data)
+  );
+}
+
+activateProgram(id: string): Observable<DistributionProgram> {
+  return this.http.patch<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}/activate`, {}).pipe(
+    map(response => response.data)
+  );
+}
+
+deactivateProgram(id: string): Observable<DistributionProgram> {
+  return this.http.patch<ApiResponse<DistributionProgram>>(`${this.apiPrograms}/${id}/deactivate`, {}).pipe(
+    map(response => response.data)
+  );
+}
 
 
   // MÉTODOS DE SCHEDULES
