@@ -20,9 +20,9 @@ export class DistributionService {
 }
 
   // Url de las apis distributions
-  private apiFares = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/fare";
-  private apiSchedules = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/schedules";
-  private apiRoutes = "https://reimagined-eureka-v655jjq9qg4v25w4-8080.app.github.dev/api/v2/routes"
+  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/fare";
+  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/schedules";
+  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/routes"
 
   constructor(private http: HttpClient) { }
 
@@ -85,7 +85,6 @@ getAll(): Observable<schedules[]> {
   );
 }
 
-
   getAllActiveS(): Observable<schedules[]> {
     return this.http.get<schedules[]>(`${this.apiSchedules}/active`);
   }
@@ -94,9 +93,11 @@ getAll(): Observable<schedules[]> {
     return this.http.get<schedules[]>(`${this.apiSchedules}/inactive`);
   }
 
-  getByIdS(id: string) {
-    return this.http.get<schedules>(`${this.apiSchedules}/${id}`);
-  }
+getByIdS(id: string): Observable<schedules> {
+  return this.http.get<ApiResponse<schedules>>(`${this.apiSchedules}/${id}`).pipe(
+    map(res => res.data)
+  );
+}
 
   saveSchedules(schedules: schedulesCreate): Observable<schedules> {
     return this.http.post<ApiResponse<schedules>>(this.apiSchedules, schedules).pipe(

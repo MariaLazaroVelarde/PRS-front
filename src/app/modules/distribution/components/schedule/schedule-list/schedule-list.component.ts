@@ -176,10 +176,9 @@ export class ScheduleListComponent implements OnInit {
     this.showAlert = false;
   }
 
-editSchedule(id: number) {
-  this.router.navigate(['/admin/distribution/schedule/edit', id]);
+editSchedule(scheduleCode: string) {
+  this.router.navigate(['/admin/distribution/schedule/edit', scheduleCode]);
 }
-
 
 
 
