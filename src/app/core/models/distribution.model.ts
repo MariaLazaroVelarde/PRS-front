@@ -1,5 +1,5 @@
 export interface fares {
-  id: string; // El ID que viene del backend
+  id: string; 
   organizationId: string;
   fareCode: string;
   fareName: string;
@@ -34,35 +34,39 @@ export enum FareType {
 
 // distribution schedules
 export interface schedules {
-    scheduleId: string;
-    organizationId: string;
-    scheduleCode: string;
-    zoneId: string;
-    scheduleName: string;
-    daysOfWeek: DaysOfWeek;
-    startTime: boolean;
-    endTime: boolean;
-    durationHours: number;
-    status: Status;
-    created_at: string
+  id: string; 
+  scheduleCode: string;
+  scheduleName: string;
+  daysOfWeek: string[];
+  startTime: string;
+  endTime: string;
+  durationHours: number;
+  organizationId: string;
+  zoneId: string;
+  status: 'ACTIVE' | 'INACTIVE'; // <- IMPORTANTE
 }
 
 export interface schedulesCreate {
-    scheduleName: string;
-    daysOfWeek: DaysOfWeek;
-    startTime: boolean;
-    endTime: boolean;
-    durationHours: number
+  scheduleName: string;
+  daysOfWeek: string[]; 
+  startTime: string;
+  endTime: string;
+  durationHours: number;
+  organizationId: string;
+  zoneId: string;
 }
 
 export interface schedulesUpdate {
-    scheduleCode: string;
-    scheduleName: string;
-    daysOfWeek: DaysOfWeek;
-    startTime: boolean;
-    endTime: boolean;
-    durationHours: number
+  scheduleCode: string;
+  scheduleName: string;
+  daysOfWeek: string[]; 
+  startTime: string;
+  endTime: string;
+  durationHours: number;
+  organizationId: string;
+  zoneId: string;
 }
+
 
 export enum DaysOfWeek {
     LUNES = 'LUNES',

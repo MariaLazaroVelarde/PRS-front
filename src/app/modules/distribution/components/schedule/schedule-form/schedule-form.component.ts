@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { organization, zones } from '../../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
-import { DaysOfWeek, schedules, schedulesCreate, schedulesUpdate } from '../../../../../core/models/distribution.model';
+import { schedulesCreate, schedulesUpdate } from '../../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../../core/services/distribution.service';
 
 @Component({
@@ -32,44 +32,56 @@ export class ScheduleFormComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.scheduleForm = this.fb.group({
-      scheduleId: ['', Validators.required],
-      streetName: ['', [Validators.required, Validators.minLength(3)]],
-      DaysOfWeek: ['', [Validators.required, Validators.minLength(3)]],
-      startTime: ['', [Validators.required, Validators.minLength(3)]],
-      endTime: ['', [Validators.required, Validators.minLength(3)]],
-      durationHours: ['', [Validators.required, Validators.minLength(3)]]
+      organizationId: ['', Validators.required],
+      zoneId: ['', Validators.required],
+      scheduleName: ['', [Validators.required, Validators.maxLength(100)]],
+      daysOfWeek: [[], [Validators.required, Validators.minLength(1)]],
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required],
+      durationHours: ['']
     });
   }
 
-  ngOnInit(): void {
-    this.loadZones();
-    this.loadOrganizations();
-    this.checkEditMode();
+ async ngOnInit(): Promise<void> {
+  try {
+    await Promise.all([this.loadOrganizations(), this.loadZones()]);
+   this.checkEditMode();
+  } catch (err) {
+    console.error('Error inicial:', err);
   }
-
-  loadZones() {
-    this.organizationService.getAllZ().subscribe({
-      next: (data) => {
-        this.zones = data.filter(z => z.status === 'ACTIVE');
-      },
-      error: (err) => {
-        console.error('Error al cargar zonas', err);
-        Swal.fire('Error', 'No se pudieron cargar las zonas', 'error');
-      }
-    });
-  }
-
-  loadOrganizations() {
+}
+loadOrganizations(): Promise<void> {
+  return new Promise((resolve, reject) => {
     this.organizationService.getAllO().subscribe({
       next: (data) => {
         this.organizations = data.filter(o => o.status === 'ACTIVE');
+        resolve();
       },
       error: (err) => {
         console.error('Error al cargar organizaciones', err);
         Swal.fire('Error', 'No se pudieron cargar las organizaciones', 'error');
+        reject(err);
       }
     });
-  }
+  });
+}
+
+loadZones(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    this.organizationService.getAllZ().subscribe({
+      next: (data) => {
+        this.zones = data.filter(z => z.status === 'ACTIVE');
+        resolve();
+      },
+      error: (err) => {
+        console.error('Error al cargar zonas', err);
+        Swal.fire('Error', 'No se pudieron cargar las zonas', 'error');
+        reject(err);
+      }
+    });
+  });
+}
+
 
   checkEditMode() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -85,83 +97,124 @@ export class ScheduleFormComponent implements OnInit {
     this.distributionService.getByIdS(id).subscribe({
       next: (schedule) => {
         this.scheduleCode = schedule.scheduleCode;
-        this.scheduleForm.patchValue({
-          scheduleId: schedule.scheduleId,
-          scheduleName: schedule.scheduleName,
-          daysOfWeek: schedule.daysOfWeek,
-          startTime: schedule.startTime,
-          endTime: schedule.endTime,
-          durationHours: schedule.durationHours
-        });
+
+      this.scheduleForm.patchValue({
+  scheduleName: schedule.scheduleName,
+  daysOfWeek: schedule.daysOfWeek,
+  startTime: schedule.startTime,
+  endTime: schedule.endTime,
+  durationHours: schedule.durationHours,
+  organizationId: schedule.organizationId,
+  zoneId: schedule.zoneId
+});
+
+
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Error al cargar horarios', err);
+      error: () => {
         this.loading = false;
-        Swal.fire('Error', 'No se pudo cargar los horarios', 'error');
-        this.router.navigate(['/admin/distributions/schedule']);
+        Swal.fire('Error', 'No se pudo cargar el horario', 'error');
+        this.router.navigate(['/admin/distribution/schedule']);
       }
     });
   }
 
-  onSubmit() {
-    if (this.scheduleForm.valid) {
-      this.loading = true;
-      const formData = this.scheduleForm.value;
+  onCheckboxChange(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    const value = checkbox.value;
+    const daysArray: string[] = this.scheduleForm.get('daysOfWeek')?.value || [];
 
-      if (this.isEditMode) {
-        const updateData: schedulesUpdate = {
-          scheduleCode: this.scheduleCode,
-          scheduleName: formData.scheduleName,
-          daysOfWeek: formData.daysOfWeek,
-          startTime: formData.startTime,
-          endTime: formData.endTime,
-          durationHours: formData.durationHours
-        };
-        this.distributionService.deactivateSchedules(this.scheduleId).subscribe({
-          next: () => {
-            this.loading = false;
-            Swal.fire('Éxito', 'Horario actualizado correctamente', 'success').then(() => {
-              this.router.navigate(['/admin/distributions/schedule']);
-            });
-          },
-          error: (err) => {
-            console.error('Error al actualizar el horario', err);
-            this.loading = false;
-            Swal.fire('Error', 'No se pudo actualizar el horario', 'error');
-          }
-        });
-      } else {
-        const createData: schedulesCreate = {
-          scheduleName: formData.scheduleName,
-          daysOfWeek: formData.daysOfWeek,
-          startTime: formData.startTime,
-          endTime: formData.endTime,
-          durationHours: formData.durationHours
-        };
-        this.distributionService.saveSchedules(createData).subscribe({
-          next: () => {
-            this.loading = false;
-            Swal.fire('Éxito', 'Horario creado correctamente', 'success').then(() => {
-              this.router.navigate(['/admin/distributions/schedule']);
-            });
-          },
-          error: (err) => {
-            console.error('Error al crear el horario', err);
-            this.loading = false;
-            Swal.fire('Error', 'No se pudo crear el horario', 'error');
-          }
-        });
-      }
-    } else {
+    if (checkbox.checked && !daysArray.includes(value)) {
+      daysArray.push(value);
+    } else if (!checkbox.checked) {
+      const index = daysArray.indexOf(value);
+      if (index > -1) daysArray.splice(index, 1);
+    }
+
+    this.scheduleForm.get('daysOfWeek')?.setValue(daysArray);
+    this.scheduleForm.get('daysOfWeek')?.markAsTouched();
+    this.scheduleForm.get('daysOfWeek')?.updateValueAndValidity();
+  }
+
+  isDayChecked(day: string): boolean {
+    const selectedDays = this.scheduleForm.get('daysOfWeek')?.value || [];
+    return selectedDays.includes(day);
+  }
+ 
+  onSubmit() {
+    if (this.scheduleForm.invalid) {
       this.markFormGroupTouched();
+      return;
+    }
+
+    const formData = this.scheduleForm.value;
+
+    if (formData.startTime >= formData.endTime) {
+      Swal.fire('Error', 'La hora de inicio debe ser menor que la hora de fin', 'warning');
+      return;
+    }
+
+    this.loading = true;
+
+    const [startHour, startMin] = formData.startTime.split(':').map(Number);
+    const [endHour, endMin] = formData.endTime.split(':').map(Number);
+    const duration = ((endHour * 60 + endMin) - (startHour * 60 + startMin)) / 60;
+
+    this.scheduleForm.get('durationHours')?.setValue(duration);
+
+    if (this.isEditMode) {
+      const updateData: schedulesUpdate = {
+        scheduleCode: this.scheduleCode,
+        scheduleName: formData.scheduleName,
+        daysOfWeek: formData.daysOfWeek,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        durationHours: duration,
+        organizationId: formData.organizationId,
+        zoneId: formData.zoneId
+      };
+
+      this.distributionService.updateSchedules(this.scheduleId, updateData).subscribe({
+        next: () => {
+          this.loading = false;
+          Swal.fire('Éxito', 'Horario actualizado correctamente', 'success').then(() => {
+            this.router.navigate(['/admin/distribution/schedule']);
+          });
+        },
+        error: () => {
+          this.loading = false;
+          Swal.fire('Error', 'No se pudo actualizar el horario', 'error');
+        }
+      });
+    } else {
+      const createData: schedulesCreate = {
+        scheduleName: formData.scheduleName,
+        daysOfWeek: formData.daysOfWeek,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        durationHours: duration,
+        organizationId: formData.organizationId,
+        zoneId: formData.zoneId
+      };
+
+      this.distributionService.saveSchedules(createData).subscribe({
+        next: () => {
+          this.loading = false;
+          Swal.fire('Éxito', 'Horario creado correctamente', 'success').then(() => {
+            this.router.navigate(['/admin/distribution/schedule']);
+          });
+        },
+        error: () => {
+          this.loading = false;
+          Swal.fire('Error', 'No se pudo crear el horario', 'error');
+        }
+      });
     }
   }
 
   markFormGroupTouched() {
-    Object.keys(this.scheduleForm.controls).forEach(key => {
-      const control = this.scheduleForm.get(key);
-      control?.markAsTouched();
+    Object.values(this.scheduleForm.controls).forEach(control => {
+      control.markAsTouched();
     });
   }
 
@@ -175,22 +228,19 @@ export class ScheduleFormComponent implements OnInit {
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Sí, salir',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
-        this.router.navigate(['/admin/distributions/schedule']);
+        this.router.navigate(['/admin/distribution/schedule']);
       }
     });
   }
 
   getFieldError(fieldName: string): string {
     const field = this.scheduleForm.get(fieldName);
-    if (field?.errors && field?.touched) {
-      if (field.errors['required']) {
-        return 'Este campo es requerido';
-      }
-      if (field.errors['minlength']) {
-        return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
-      }
+    if (field?.errors && field.touched) {
+      if (field.errors['required']) return 'Este campo es requerido';
+      if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+      if (field.errors['min']) return 'Debe ser un número mayor que 0';
     }
     return '';
   }

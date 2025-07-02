@@ -12,6 +12,9 @@ interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class DistributionService {
+  getZones() {
+    throw new Error('Method not implemented.');
+  }
  getAllFares(): Observable<fares[]> {
   return this.getAllF(); // ← usa internamente el método ya existente
 }

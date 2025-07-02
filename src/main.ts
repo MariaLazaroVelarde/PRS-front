@@ -23,7 +23,6 @@ const enhancedAppConfig = {
   providers: [
     ...appConfig.providers,
     provideAnimations(),
-    provideHttpClient() 
   ]
 };
 

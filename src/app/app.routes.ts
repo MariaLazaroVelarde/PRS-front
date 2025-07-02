@@ -53,6 +53,7 @@ export const APP_ROUTES: Routes = [
         import('./modules/distribution/components/routes/routes-list/routes-list.component')
           .then(c => c.RoutesListComponent),
     },
+    // fares no se toca ya que funciona bien
     {
       path: 'fares',
       children: [
@@ -76,15 +77,38 @@ export const APP_ROUTES: Routes = [
         }
       ]
     },
-    {
-      path: 'schedule',
-      loadComponent: () =>
-        import('./modules/distribution/components/schedule/schedule-list/schedule-list.component')
-          .then(c => c.ScheduleListComponent),
-    }
-  ]
-}
-,
+
+      {
+        path: 'schedule',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./modules/distribution/components/schedule/schedule-list/schedule-list.component')
+                .then(c => c.ScheduleListComponent),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
+                .then(c => c.ScheduleFormComponent),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
+                .then(c => c.ScheduleFormComponent),
+          }
+        ]
+      },
+      {
+        path: 'complaints',
+        loadComponent: () =>
+          import('./modules/complaints/components/complaint-list/complaint-list.component')
+            .then(c => c.ComplaintListComponent),
+      }
+    ]
+  },
       {
         path: 'complaints',
         loadComponent: () => import('./modules/complaints/components/complaint-list/complaint-list.component').then(c => c.ComplaintListComponent),
