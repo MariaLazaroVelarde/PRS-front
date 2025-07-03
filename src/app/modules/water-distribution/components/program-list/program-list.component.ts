@@ -120,6 +120,13 @@ export class ProgramListComponent implements OnInit {
     return this.programs.filter(p => p.status === 'COMPLETED').length;
   }
 
+  getResponsibleName(responsibleUserId: string): string {
+  const user = this.users.find(u => u.responsibleUserId === responsibleUserId);
+  return user ? user.name : responsibleUserId;
+}
+
+
+
   getWarningProgramsCount(): number {
     return this.programs.filter(p => p.status === 'IN_PROGRESS').length;
   }
@@ -153,11 +160,11 @@ export class ProgramListComponent implements OnInit {
   }
 
   updatePrograms(id: string): void {
-    this.router.navigate(['/admin/distribution/programEdit', id]);
+   this.router.navigate(['/admin/distribution/programs/edit', id]);
   }
 
   addNewPrograms(): void {
-    this.router.navigate(['/admin/distribution/programNew']);
+   this.router.navigate(['/admin/distribution/programs/new']);
   }
 
   trackByProgramsId(index: number, program: DistributionProgram): string {
@@ -179,10 +186,6 @@ export class ProgramListComponent implements OnInit {
     return schedule ? schedule.scheduleName : scheduleId;
   }
 
-  getResponsibleName(responsibleUserId: string): string {
-    const user = this.users.find(u => u.responsibleUserId === responsibleUserId);
-    return user ? user.name : responsibleUserId;
-  }
 
   dismissAlert(): void {
     this.showAlert = false;

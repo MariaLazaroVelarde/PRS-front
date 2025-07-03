@@ -23,8 +23,8 @@ export class DistributionService {
   private apiFares = "https://vg-ms-distribution-production.up.railway.app/api/v2/fare";
   private apiSchedules = "https://vg-ms-distribution-production.up.railway.app/api/v2/schedules";
   private apiRoutes = "https://vg-ms-distribution-production.up.railway.app/api/v2/routes"
- 
   constructor(private http: HttpClient) { }
+
 
   // MÉTODOS DE FARES
 

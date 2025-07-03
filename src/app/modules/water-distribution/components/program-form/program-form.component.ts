@@ -82,29 +82,33 @@ export class ProgramFormComponent implements OnInit {
     return !!(field && field.invalid && (field.touched || field.dirty));
   }
 
-  onSubmit(): void {
-    if (this.programsForm.invalid) {
-      this.markFormGroupTouched(this.programsForm);
-      return;
-    }
-
-    this.isSubmitting = true;
-    const formData: DistributionProgram = this.prepareFormData();
-
-    const request = this.isEditMode
-      ? this.programsService.updateProgram(this.programId!, formData)
-      : this.programsService.createProgram(formData);
-
-    request.subscribe({
-      next: () => {
-        this.router.navigate(['/admin/programs']);
-      },
-      error: (error) => {
-        console.error('Error al guardar programa:', error);
-        this.isSubmitting = false;
-      }
-    });
+onSubmit(): void {
+  if (this.programsForm.invalid) {
+    this.markFormGroupTouched(this.programsForm);
+    return;
   }
+
+  this.isSubmitting = true;
+  const formData: DistributionProgram = this.prepareFormData();
+
+  // 👇 Agrega esto
+  console.log('✅ Payload enviado al backend:', JSON.stringify(formData, null, 2));
+
+  const request = this.isEditMode
+    ? this.programsService.updateProgram(this.programId!, formData)
+    : this.programsService.createProgram(formData);
+
+  request.subscribe({
+    next: () => {
+      this.router.navigate(['/admin/programs']);
+    },
+    error: (error) => {
+      console.error('❌ Error al guardar programa:', error);
+      this.isSubmitting = false;
+    }
+  });
+}
+
 
   goBack(): void {
     this.router.navigate(['/admin/programs']);
@@ -116,25 +120,39 @@ export class ProgramFormComponent implements OnInit {
     });
   }
 
-  private prepareFormData(): DistributionProgram {
-    const form = this.programsForm.value;
+  private formatDateOnly(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toISOString().split('T')[0]; // Devuelve solo "YYYY-MM-DD"
+}
 
-    return {
-      id: this.programId ?? '', // usa ID si estás en modo edición
-      programCode: form.programCode,
-      programDate: new Date(form.programDate).toISOString(),
-      plannedStartTime: new Date(form.plannedStartTime).toISOString(),
-      plannedEndTime: new Date(form.plannedEndTime).toISOString(),
-      actualStartTime: form.actualStartTime ? new Date(form.actualStartTime).toISOString() : null,
-      actualEndTime: form.actualEndTime ? new Date(form.actualEndTime).toISOString() : null,
-      organizationId: form.organizationId,
-      routeId: form.routeId || null,
-      scheduleId: form.scheduleId || null,
-      responsibleUserId: form.responsibleUserId || null,
-      status: form.status,
-      observations: form.observations
-    };
-  }
+private formatTimeOnly(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toISOString().split('T')[1].substring(0, 5); // Devuelve solo "HH:mm"
+}
+
+
+ private prepareFormData(): any {
+  const form = this.programsForm.value;
+
+  const base = {
+    programCode: form.programCode,
+   programDate: this.formatDateOnly(form.programDate),
+plannedStartTime: this.formatTimeOnly(form.plannedStartTime),
+plannedEndTime: this.formatTimeOnly(form.plannedEndTime),
+actualStartTime: form.actualStartTime ? this.formatTimeOnly(form.actualStartTime) : null,
+actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : null,
+    organizationId: form.organizationId,
+    routeId: form.routeId || null,
+    scheduleId: form.scheduleId || null,
+    responsibleUserId: form.responsibleUserId || null,
+    status: form.status,
+    observations: form.observations
+  };
+
+  // Solo incluye el ID si estás en modo edición
+  return this.isEditMode ? { ...base, id: this.programId! } : base;
+}
+
 
   private loadProgram(): void {
     this.programsService.getProgramById(this.programId!).subscribe({

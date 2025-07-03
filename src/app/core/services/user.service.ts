@@ -13,7 +13,7 @@ interface ApiResponse<T> {
 })
 export class UserService {
   // Url de las apis organizations
-  private api = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/user";
+  private api = "https://laughing-zebra-9v6rwq7vjgxh79xw-8080.app.github.dev/api/v2/user";
 
   constructor(private http: HttpClient) { }
 
