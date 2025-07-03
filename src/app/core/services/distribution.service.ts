@@ -20,9 +20,9 @@ export class DistributionService {
 }
 
   // Url de las apis distributions
-  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/fare";
-  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/schedules";
-  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/routes"
+  private apiFares = "https://vg-ms-distribution-production.up.railway.app/api/v2/fare";
+  private apiSchedules = "https://vg-ms-distribution-production.up.railway.app/api/v2/schedules";
+  private apiRoutes = "https://vg-ms-distribution-production.up.railway.app/api/v2/routes"
  
   constructor(private http: HttpClient) { }
 
