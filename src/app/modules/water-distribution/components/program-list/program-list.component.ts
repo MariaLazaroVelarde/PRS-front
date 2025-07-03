@@ -5,6 +5,10 @@ import { DistributionProgram } from '../../../../core/models/water-distribution.
 import { routes, schedules } from '../../../../core/models/distribution.model';
 import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { DistributionService } from '../../../../core/services/distribution.service';
+import { User } from '../../../../core/models/user.model';
+import { UserService } from '../../../../core/services/user.service';
+import { organization } from '../../../../core/models/organization.model';
+import { OrganizationService } from '../../../../core/services/organization.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -18,6 +22,8 @@ export class ProgramListComponent implements OnInit {
   filteredPrograms: DistributionProgram[] = [];
   routes: routes[] = [];
   schedules: schedules[] = [];
+  users: User[] = [];
+  organization: organization[] = [];
   loading = false;
   showAlert = false;
   alertType: 'success' | 'error' | 'info' = 'info';
@@ -28,13 +34,17 @@ export class ProgramListComponent implements OnInit {
   constructor(
     private programsService: ProgramsService,
     private distributionService: DistributionService,
+    private UserService: UserService,
+    private OrganizationService: OrganizationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadPrograms();
     this.loadRoutes();
     this.loadSchedules();
+    this.loadUsers();
+    this. loadOrganizations();
   }
 
   private loadPrograms(): void {
@@ -63,6 +73,26 @@ export class ProgramListComponent implements OnInit {
     this.distributionService.getAll().subscribe({
       next: (data: schedules[]) => this.schedules = data,
       error: (error: any) => console.error('Error al cargar horarios:', error)
+    });
+  }
+
+  private loadUsers(): void {
+    this.UserService.getAll().subscribe({
+      next: (data: User[]) => {
+        console.log('Usuarios cargados:', data); // <- Agrega esto
+        this.users = data;
+      },
+      error: (error: any) => console.error('Error al cargar usuarios:', error)
+    });
+  }
+
+  private loadOrganizations(): void {
+    this.OrganizationService.getAllO().subscribe({
+      next: (data: organization[]) => {
+        console.log('Organizaciones cargados:', data); // <- Agrega esto
+        this.organization = data;
+      },
+      error: (error: any) => console.error('Error al cargar organizaciones:', error)
     });
   }
 
@@ -134,14 +164,24 @@ export class ProgramListComponent implements OnInit {
     return program.id;
   }
 
+  getOrganizationName(organizationId: string): string {
+    const organization = this.organization.find(o => o.organizationId === organizationId);
+    return organization ? organization.organizationName : organizationId;
+  }
+
   getRouteName(routeId: string): string {
-    const route = this.routes.find(r => r.routeId === routeId);
+    const route = this.routes.find(r => r.id === routeId);
     return route ? route.routeName : routeId;
   }
 
-  getScheduleName(scheduleCode: string): string {
-    const schedule = this.schedules.find(s => s.scheduleCode === scheduleCode);
-    return schedule ? schedule.scheduleName : scheduleCode;
+  getScheduleName(scheduleId: string): string {
+    const schedule = this.schedules.find(s => s.id === scheduleId);
+    return schedule ? schedule.scheduleName : scheduleId;
+  }
+
+  getResponsibleName(responsibleUserId: string): string {
+    const user = this.users.find(u => u.responsibleUserId === responsibleUserId);
+    return user ? user.name : responsibleUserId;
   }
 
   dismissAlert(): void {

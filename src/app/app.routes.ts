@@ -44,79 +44,92 @@ export const APP_ROUTES: Routes = [
         path: 'payments',
         loadComponent: () => import('./modules/payments/components/payment-list/payment-list.component').then(c => c.PaymentListComponent),
       },
-{
-  path: 'distribution',
-  children: [
-    {
-      path: 'routes',
-      loadComponent: () =>
-        import('./modules/distribution/components/routes/routes-list/routes-list.component')
-          .then(c => c.RoutesListComponent),
-    },
-{
-  path: 'programs',
-  loadComponent: () =>
-    import('./modules/water-distribution/components/program-list/program-list.component')
-      .then(c => c.ProgramListComponent),
-}
-,
-
-
-    {
-      path: 'fares',
-      children: [
-        {
-          path: '',
-          loadComponent: () =>
-            import('./modules/distribution/components/fares/fares-list/fare-list.component')
-              .then(c => c.FareListComponent),
-        },
-        {
-          path: 'new',
-          loadComponent: () =>
-            import('./modules/distribution/components/fares/fares-form/fare-form.component')
-              .then(c => c.FareFormComponent),
-        },
-        {
-          path: 'edit/:id',
-          loadComponent: () =>
-            import('./modules/distribution/components/fares/fares-form/fare-form.component')
-              .then(c => c.FareFormComponent),
-        }
-      ]
-    },
-
       {
-        path: 'schedule',
+        path: 'distribution',
         children: [
           {
-            path: '',
+            path: 'routes',
             loadComponent: () =>
-              import('./modules/distribution/components/schedule/schedule-list/schedule-list.component')
-                .then(c => c.ScheduleListComponent),
+              import('./modules/distribution/components/routes/routes-list/routes-list.component')
+                .then(c => c.RoutesListComponent),
           },
           {
-            path: 'new',
-            loadComponent: () =>
-              import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
-                .then(c => c.ScheduleFormComponent),
+            path: 'programs',
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./modules/water-distribution/components/program-list/program-list.component')
+                    .then(c => c.ProgramListComponent),
+              },
+              {
+                path: 'new',
+                loadComponent: () =>
+                  import('./modules/water-distribution/components/program-form/program-form.component')
+                    .then(c => c.ProgramFormComponent),
+              },
+              {
+                path: 'edit/:id',
+                loadComponent: () =>
+                  import('./modules/water-distribution/components/program-form/program-form.component')
+                    .then(c => c.ProgramFormComponent),
+              }
+            ]
           },
           {
-            path: 'edit/:id',
+            path: 'fares',
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./modules/distribution/components/fares/fares-list/fare-list.component')
+                    .then(c => c.FareListComponent),
+              },
+              {
+                path: 'new',
+                loadComponent: () =>
+                  import('./modules/distribution/components/fares/fares-form/fare-form.component')
+                    .then(c => c.FareFormComponent),
+              },
+              {
+                path: 'edit/:id',
+                loadComponent: () =>
+                  import('./modules/distribution/components/fares/fares-form/fare-form.component')
+                    .then(c => c.FareFormComponent),
+              }
+            ]
+          },
+          {
+            path: 'schedule',
+            children: [
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./modules/distribution/components/schedule/schedule-list/schedule-list.component')
+                    .then(c => c.ScheduleListComponent),
+              },
+              {
+                path: 'new',
+                loadComponent: () =>
+                  import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
+                    .then(c => c.ScheduleFormComponent),
+              },
+              {
+                path: 'edit/:id',
+                loadComponent: () =>
+                  import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
+                    .then(c => c.ScheduleFormComponent),
+              }
+            ]
+          },
+          {
+            path: 'complaints',
             loadComponent: () =>
-              import('./modules/distribution/components/schedule/schedule-form/schedule-form.component')
-                .then(c => c.ScheduleFormComponent),
+              import('./modules/complaints/components/complaint-list/complaint-list.component')
+                .then(c => c.ComplaintListComponent),
           }
         ]
       },
-      {
-        path: 'complaints',
-        loadComponent: () =>
-          import('./modules/complaints/components/complaint-list/complaint-list.component')
-            .then(c => c.ComplaintListComponent),
-      }
-    ]
-  },
       {
         path: 'complaints',
         loadComponent: () => import('./modules/complaints/components/complaint-list/complaint-list.component').then(c => c.ComplaintListComponent),

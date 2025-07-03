@@ -19,6 +19,7 @@ export interface faresCreate {
 }
 
 export interface faresUpdate {
+    organizationId: string; 
     fareCode: string;
     fareName: string;
     fareType: FareType;
@@ -34,7 +35,7 @@ export enum FareType {
 
 // distribution schedules
 export interface schedules {
-  id: string; 
+  id: string;
   scheduleCode: string;
   scheduleName: string;
   daysOfWeek: string[];
@@ -76,7 +77,7 @@ export enum DaysOfWeek {
 
 // distribution routes
 export interface routes {
-    routeId: string;
+    id: string;
     organizationId: string;
     routeCode: string;
     routeName: string;

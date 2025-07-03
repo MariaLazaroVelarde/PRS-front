@@ -9,7 +9,7 @@ import { ApiResponse } from '../models/distribution.model';
 })
 export class ProgramsService {
 
-  private readonly apiPrograms = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8086.app.github.dev/api/v2/programs"
+  private readonly apiPrograms = "https://probable-couscous-44x4945q6j7f7jr6-8080.app.github.dev/api/v2/programs"
 
   constructor(private http: HttpClient) { }
 

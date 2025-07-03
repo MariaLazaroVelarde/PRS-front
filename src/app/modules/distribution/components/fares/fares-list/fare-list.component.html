@@ -100,8 +100,6 @@
     </div>
   </div>
 
-
-  
     <div *ngIf="loading" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
       <p class="mt-2 text-gray-500">Cargando tarifas...</p>
@@ -147,7 +145,7 @@
                 {{ fare.fareType }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ fare.fareAmount | number:'1.2-2' }}
+                S/.{{ fare.fareAmount | number:'1.2-2' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ getNameOrganization(fare.organizationId) }}

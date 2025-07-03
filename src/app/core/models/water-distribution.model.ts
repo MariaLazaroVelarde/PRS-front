@@ -1,5 +1,6 @@
 import { organization } from "./organization.model";
 import { schedules, routes } from "./distribution.model";
+import { User } from "./user.model";
 
 // distribution programas
 export interface DistributionProgram {
@@ -16,7 +17,7 @@ export interface DistributionProgram {
   status: ProgramStatus;
   responsibleUserId: string;
   observations?: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface DistributionProgramCreate {

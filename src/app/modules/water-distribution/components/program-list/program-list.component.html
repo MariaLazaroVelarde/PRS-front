@@ -133,6 +133,9 @@
               HORA REAL
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              ORGANIZACIÓN
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               RUTA
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -161,10 +164,13 @@
               {{ programs.programDate | date:'dd/MM/yyyy' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ programs.plannedStartTime }} - {{ programs.plannedEndTime }}
+              {{ programs.plannedStartTime }} - {{ programs.plannedEndTime }}h
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ programs.actualStartTime || '-' }} - {{ programs.actualEndTime || '-' }}
+              {{ programs.actualStartTime || '-' }} - {{ programs.actualEndTime || '-' }}h
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ getOrganizationName(programs.organizationId) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ getRouteName(programs.routeId) }}
@@ -173,7 +179,7 @@
               {{ getScheduleName(programs.scheduleId) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ programs.responsibleUserId }} 
+              {{ getResponsibleName(programs.responsibleUserId) }} 
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"

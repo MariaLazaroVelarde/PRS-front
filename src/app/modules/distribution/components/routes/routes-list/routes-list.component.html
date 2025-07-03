@@ -83,8 +83,8 @@
           </div>
           <button (click)="addNewRoute()" class="btn-primary">
             <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+              </path>
             </svg>
             Agregar Ruta
           </button>
@@ -113,12 +113,12 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr *ngFor="let route of filteredRoutes; trackBy: trackByRouteId" class="hover:bg-gray-50">
-             <td class="px-6 py-4 text-sm text-gray-900">{{ route.routeCode }}</td>
-<td class="px-6 py-4 text-sm text-gray-900">{{ route.routeName }}</td>
-<td class="px-6 py-4 text-sm text-gray-900">{{ getNameOrganization(route.organizationId) }}</td>
-<td class="px-6 py-4 text-sm text-gray-900">{{ route.zones }} h</td>
-<td class="px-6 py-4 text-sm text-gray-900">{{ route.totalEstimatedDuration }} h</td>
-<td class="px-6 py-4 text-sm text-gray-900">{{ getUserName(route.responsibleUserId) }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ route.routeCode }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ route.routeName }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ getNameOrganization(route.organizationId) }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ route.zones }} h</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ route.totalEstimatedDuration }}h</td>
+                <td class="px-6 py-4 text-sm text-gray-900">{{ getUserName(route.responsibleUserId) }}</td>
 
                 <td class="px-6 py-4 text-sm text-gray-900">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"

@@ -47,6 +47,7 @@ export class FareFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadOrganizations();
+    
     this.checkEditMode();
 
     if (!this.isEditMode) {
@@ -127,6 +128,7 @@ export class FareFormComponent implements OnInit {
 
       if (this.isEditMode) {
         const updateData: faresUpdate = {
+          organizationId: formData.organizationId,
           fareCode: formData.fareCode,
           fareName: formData.fareName,
           fareType: formData.fareType,
