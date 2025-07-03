@@ -22,13 +22,12 @@ export class DistributionService {
 // distribution.service.ts
 
   // Url de las apis distributions
-  private apiFares = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/fare";
-  private apiSchedules = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/schedules";
-  private apiRoutes = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/routes"
-  private apiUrl = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/users"
-  private readonly apiPrograms = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/programs"
+  private apiFares = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/fare";
+  private apiSchedules = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/schedules";
+  private apiRoutes = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/routes"
+  private apiUrl = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/users"
+  private readonly apiPrograms = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/programs"
 
-  
   constructor(private http: HttpClient) { }
 
    getAllUsers(): Observable<any[]> {
@@ -94,7 +93,6 @@ getByIdF(id: string): Observable<fares> {
   }
 
 // MÉTODOS DE PROGRAMS
-
 getAllPrograms(): Observable<DistributionProgram[]> {
   return this.http.get<ApiResponse<DistributionProgram[]>>(this.apiPrograms).pipe(
     map(response => response.data)
@@ -139,11 +137,11 @@ deactivateProgram(id: string): Observable<DistributionProgram> {
 
 
   // MÉTODOS DE SCHEDULES
-getAll(): Observable<schedules[]> {
+ getAll(): Observable<schedules[]> {
   return this.http.get<ApiResponse<schedules[]>>(this.apiSchedules).pipe(
     map(res => res.data)
   );
-}
+ }
 
   getAllActiveS(): Observable<schedules[]> {
     return this.http.get<schedules[]>(`${this.apiSchedules}/active`);
@@ -207,4 +205,6 @@ getByIdR(id: string): Observable<routes> {
     map(response => response.data)
   );
 }
+
+
 }

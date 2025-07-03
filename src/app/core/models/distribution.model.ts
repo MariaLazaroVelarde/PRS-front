@@ -125,9 +125,14 @@ export interface ApiResponse<T> {
 
 // Usuario
 export interface User {
-  id: string;
   name: string;
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
+  status: 'ACTIVE' | 'INACTIVE';
 }
+
 
 // Programas de distribución
 
@@ -159,7 +164,7 @@ export interface DistributionProgram {
   actualEndTime?: string;
   responsibleUserId: string;
   observations?: string;
-  status: Status;
+  status: ProgramStatus; 
   created_at: string;
 }
 
@@ -174,4 +179,11 @@ export interface DistributionProgramUpdate {
   responsibleUserId?: string;
   observations?: string;
   status?: Status;
+}
+
+export enum ProgramStatus {
+  PLANNED = 'PLANNED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
 }

@@ -5,85 +5,85 @@ import { map, Observable, tap } from 'rxjs';
 
 interface ApiResponse<T> {
   status: boolean,
-  data: T
-}
+    data: T
+    }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class OrganizationService {
-  // Url de las apis organizations
-  private apiOrg = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/organizations";
-  private apiZon = "https://fantastic-garbanzo-5vqjqwvxxqrfpxv4-8080.app.github.dev/api/v2/zones";
+    @Injectable({
+      providedIn: 'root'
+      })
+      export class OrganizationService {
+        // Url de las apis organizations
+          private apiOrg = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/organizations";
+            private apiZon = "https://orange-palm-tree-x6r7x9569qr367wq-8080.app.github.dev/api/v2/zones";
 
-  constructor(private http: HttpClient) { }
+              constructor(private http: HttpClient) { }
 
-  getAllO() {
-    return this.http.get<organization[]>(this.apiOrg);
-  }
+                getAllO() {
+                    return this.http.get<organization[]>(this.apiOrg);
+                      }
 
-  getByIdO(id: string) {
-    return this.http.get<organization>(`${this.apiOrg}/${id}`);
-  }
-
-
-  saveO(organization: organizationCreate): Observable<organization> {
-    return this.http.post<ApiResponse<organization>>(this.apiOrg, organization).pipe(
-      map(response => response.data)
-    );
-  }
-
-  updateO(id: string, client: organizationUpdate): Observable<organization> {
-    return this.http.put<ApiResponse<organization>>(`${this.apiOrg}/${id}`, client).pipe(
-      map(response => response.data)
-    );
-  }
+                        getByIdO(id: string) {
+                            return this.http.get<organization>(`${this.apiOrg}/${id}`);
+                              }
 
 
-  desactivateO(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/desactivate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
+                                saveO(organization: organizationCreate): Observable<organization> {
+                                    return this.http.post<ApiResponse<organization>>(this.apiOrg, organization).pipe(
+                                          map(response => response.data)
+                                              );
+                                                }
 
-  activateO(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/activate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
+                                                  updateO(id: string, client: organizationUpdate): Observable<organization> {
+                                                      return this.http.put<ApiResponse<organization>>(`${this.apiOrg}/${id}`, client).pipe(
+                                                            map(response => response.data)
+                                                                );
+                                                                  }
 
-  // Metode zones 
 
-  getAllZ() {
-    return this.http.get<zones[]>(this.apiZon);
-  }
+                                                                    desactivateO(id: string): Observable<void> {
+                                                                        return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/desactivate`, {}).pipe(
+                                                                              map(response => response.data)
+                                                                                  );
+                                                                                    }
 
-  getByIdZ(id: string) {
-    return this.http.get<zones>(`${this.apiZon}/${id}`);
-  }
+                                                                                      activateO(id: string): Observable<void> {
+                                                                                          return this.http.patch<ApiResponse<void>>(`${this.apiOrg}/${id}/activate`, {}).pipe(
+                                                                                                map(response => response.data)
+                                                                                                    );
+                                                                                                      }
 
-  saveZ(zone: zonesCreate): Observable<zones> {
-    return this.http.post<ApiResponse<zones>>(this.apiZon, zone).pipe(
-      map(response => response.data)
-    );
-  }
+                                                                                                        // Metode zones 
 
-  updateZ(id: string, zone: zonesUpdate): Observable<zones> {
-    return this.http.put<ApiResponse<zones>>(`${this.apiZon}/${id}`, zone).pipe(
-      map(response => response.data)
-    );
-  }
+                                                                                                          getAllZ() {
+                                                                                                              return this.http.get<zones[]>(this.apiZon);
+                                                                                                                }
 
-  desactivateZ(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/desactivate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
+                                                                                                                  getByIdZ(id: string) {
+                                                                                                                      return this.http.get<zones>(`${this.apiZon}/${id}`);
+                                                                                                                        }
 
-  activateZ(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/activate`, {}).pipe(
-      map(response => response.data)
-    );
-  }
+                                                                                                                          saveZ(zone: zonesCreate): Observable<zones> {
+                                                                                                                              return this.http.post<ApiResponse<zones>>(this.apiZon, zone).pipe(
+                                                                                                                                    map(response => response.data)
+                                                                                                                                        );
+                                                                                                                                          }
 
-}
+                                                                                                                                            updateZ(id: string, zone: zonesUpdate): Observable<zones> {
+                                                                                                                                                return this.http.put<ApiResponse<zones>>(`${this.apiZon}/${id}`, zone).pipe(
+                                                                                                                                                      map(response => response.data)
+                                                                                                                                                          );
+                                                                                                                                                            }
+
+                                                                                                                                                              desactivateZ(id: string): Observable<void> {
+                                                                                                                                                                  return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/desactivate`, {}).pipe(
+                                                                                                                                                                        map(response => response.data)
+                                                                                                                                                                            );
+                                                                                                                                                                              }
+
+                                                                                                                                                                                activateZ(id: string): Observable<void> {
+                                                                                                                                                                                    return this.http.patch<ApiResponse<void>>(`${this.apiZon}/${id}/activate`, {}).pipe(
+                                                                                                                                                                                          map(response => response.data)
+                                                                                                                                                                                              );
+                                                                                                                                                                                                }
+
+                                                                                                                                                                                                }

@@ -2,10 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DistributionProgram } from '../../../../core/models/water-distribution.model';
-import { ApiResponse, routes, schedules, User } from '../../../../core/models/distribution.model';
-import { ProgramsService } from '../../../../core/services/water-distribution.service';
+
 import { DistributionService } from '../../../../core/services/distribution.service';
+import { DistributionProgram, ApiResponse, routes, schedules, User, ProgramStatus } from '../../../../core/models/distribution.model';
 
 @Component({
   selector: 'app-program-list',
@@ -14,13 +13,13 @@ import { DistributionService } from '../../../../core/services/distribution.serv
   imports: [CommonModule, FormsModule]
 })
 export class ProgramListComponent implements OnInit {
-  [x: string]: any;
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
   routes: routes[] = [];
   schedules: schedules[] = [];
-  usersMap = new Map<string, string>();
   responsibleUsers: User[] = [];
+
+  usersMap = new Map<string, string>();
   loading = false;
   showAlert = false;
   alertType: 'success' | 'error' | 'info' = 'info';
@@ -29,7 +28,6 @@ export class ProgramListComponent implements OnInit {
   selectedStatus = 'todos';
 
   constructor(
-    private programsService: ProgramsService,
     private distributionService: DistributionService,
     private router: Router
   ) {}
@@ -43,14 +41,13 @@ export class ProgramListComponent implements OnInit {
   }
 
   private loadPrograms(): void {
-    this.loading = true;
-    this.programsService.getAllPrograms().subscribe({
-      next: (programList) => {
+    this.distributionService.getAllPrograms().subscribe({
+      next: (programList: DistributionProgram[]) => {
         this.programs = programList;
         this.filteredPrograms = programList;
         this.loading = false;
       },
-      error: (error) => this.handleError('Error al cargar los programas', error)
+      error: (error: any) => this.handleError('Error al cargar los programas', error)
     });
   }
 
@@ -79,12 +76,27 @@ export class ProgramListComponent implements OnInit {
     });
   }
 
+  loadResponsibleUsers(): void {
+    this.distributionService.getResponsibleUsers().subscribe({
+      next: (response: ApiResponse<User[]> | null) => {
+        if (response && response.data) {
+          this.responsibleUsers = response.data;
+        } else {
+          this.responsibleUsers = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error cargando responsables', error);
+        this.responsibleUsers = [];
+      }
+    });
+  }
+
   getRouteName(routeId: string): string {
     const route = this.routes.find(r => r.id === routeId);
     return route ? route.routeName : `Ruta desconocida (${routeId})`;
   }
 
-  
   getScheduleName(scheduleId: string): string {
     const schedule = this.schedules.find(s => s.id === scheduleId);
     return schedule ? schedule.scheduleName : `Horario desconocido (${scheduleId})`;
@@ -92,6 +104,11 @@ export class ProgramListComponent implements OnInit {
 
   getUserName(userId: string): string {
     return this.usersMap.get(userId) || `Usuario desconocido (${userId})`;
+  }
+
+  getResponsibleName(userId: string): string {
+    const user = this.responsibleUsers.find(u => u.id === userId);
+    return user ? (user.name || `${user.firstName} ${user.lastName}`) : '—';
   }
 
   getStatusText(status: string): string {
@@ -131,41 +148,17 @@ export class ProgramListComponent implements OnInit {
     });
   }
 
-  getAcceptableProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'COMPLETED').length;
-  }
-  
-loadResponsibleUsers(): void {
-  this.distributionService.getResponsibleUsers().subscribe({
-    next: (response: ApiResponse<User[]> | null) => {
-      if (response && response.data) {
-        this.responsibleUsers = response.data;
-      } else {
-        this.responsibleUsers = []; // ← seguridad extra
-      }
-    },
-    error: (error: any) => {
-      console.error('Error cargando responsables', error);
-      this.responsibleUsers = [];
-    }
-  });
+getAcceptableProgramsCount(): number {
+  return this.programs.filter(p => p.status === ProgramStatus.COMPLETED).length;
 }
 
-
-
-getResponsibleName(userId: string): string {
-  const user = this.responsibleUsers.find(u => u.id === userId);
-  return user ? user.name : '—';
+getWarningProgramsCount(): number {
+  return this.programs.filter(p => p.status === ProgramStatus.IN_PROGRESS).length;
 }
 
-
-  getWarningProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'IN_PROGRESS').length;
-  }
-
-  getCriticalProgramsCount(): number {
-    return this.programs.filter(p => p.status === 'CANCELLED').length;
-  }
+getCriticalProgramsCount(): number {
+  return this.programs.filter(p => p.status === ProgramStatus.CANCELLED).length;
+}
 
   viewProgramsDetail(id: string): void {
     this.router.navigate(['/admin/distribution/programDetail', id]);
@@ -175,10 +168,9 @@ getResponsibleName(userId: string): string {
     this.router.navigate(['/admin/distribution/programEdit', id]);
   }
 
-addNewPrograms(): void {
-  this.router.navigate(['/programs/new']);
-}
-
+  addNewPrograms(): void {
+    this.router.navigate(['/programs/new']);
+  }
 
   trackByProgramsId(index: number, program: DistributionProgram): string {
     return program.id;

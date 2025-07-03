@@ -4,7 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { DistributionProgramCreate } from '../../../../core/models/distribution.model';
+import { DistributionProgramCreate, schedules, routes, User } from '../../../../core/models/distribution.model';
+import { organization } from '../../../../core/models/organization.model';
 
 @Component({
   selector: 'app-program-form',
@@ -33,43 +34,49 @@ export class ProgramFormComponent implements OnInit {
     observations: ['']
   });
 
-  organizations: Organization[] = []; //No se encuentra el nombre 'Organization'.ts(2304) type Organization = /*unresolved*/ any
-  schedules: DistributionSchedule[] = []; //No se encuentra el nombre 'DistributionSchedule'.ts(2304) type DistributionSchedule = /*unresolved*/ any
-  routes: DistributionRoute[] = [];
+  organizations: organization[] = [];
+  schedules: schedules[] = [];
+  routes: routes[] = [];
   responsibleUsers: User[] = [];
 
   loading: boolean = false;
+  organizationService: any;
 
   ngOnInit(): void {
     this.loadData();
     this.generateProgramCode();
   }
 
-  loadData(): void {
-    this.loading = true;
+ loadData(): void {
+  this.loading = true;
 
-    Promise.all([
-      this.service.getOrganizations().toPromise().then(data => {
-        this.organizations = data.filter(o => o.status === 'ACTIVE');
-      }),
-      this.service.getSchedules().toPromise().then(data => {
-        this.schedules = data.filter(s => s.status === 'ACTIVE');
-      }),
-      this.service.getRoutes().toPromise().then(data => {
-        this.routes = data.filter(r => r.status === 'ACTIVE');
-      }),
-      this.service.getResponsibleUsers().toPromise().then(data => {
-        this.responsibleUsers = data.filter(u => u.status === 'ACTIVE');
-      }),
-    ])
-    .catch(err => {
-      console.error('Error cargando datos:', err);
-      Swal.fire('Error', 'No se pudieron cargar los datos de referencia', 'error');
+  Promise.all([
+    this.organizationService.getAllOrganizations().toPromise().then((data: any) => {
+      this.organizations = data.filter((o: any) => o.status === 'ACTIVE');
+    }),
+    this.service.getAll().toPromise().then((data: any) => {
+      this.schedules = data.filter((s: any) => s.status === 'ACTIVE');
+    }),
+    this.service.getAllR().toPromise().then((data: any) => {
+      this.routes = data.filter((r: any) => r.status === 'ACTIVE');
+    }),
+    this.service.getResponsibleUsers().toPromise().then(resp => {
+      if (resp?.data) {
+        this.responsibleUsers = resp.data.filter((u: any) => u.status === 'ACTIVE');
+      } else {
+        this.responsibleUsers = [];
+      }
     })
-    .finally(() => {
-      this.loading = false;
-    });
-  }
+  ])
+  .catch(err => {
+    console.error('Error cargando datos:', err);
+    Swal.fire('Error', 'No se pudieron cargar los datos de referencia', 'error');
+  })
+  .finally(() => {
+    this.loading = false;
+  });
+}
+
 
   generateProgramCode(): void {
     this.service.getAllPrograms().subscribe({
