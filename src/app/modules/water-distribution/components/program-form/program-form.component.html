@@ -1,20 +1,19 @@
 <div class="min-h-screen bg-gray-50">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Encabezado -->
     <div class="mb-8">
-      <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+      <!-- Breadcrumbs -->
+      <nav class="flex items-center text-sm text-gray-500 space-x-2 mb-4">
         <a href="/admin/dashboard" class="hover:text-blue-600">Dashboard</a>
-        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+        <span>/</span>
         <a href="/admin/programs" class="hover:text-blue-600">Programa de Distribución</a>
-        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+        <span>/</span>
         <span class="text-gray-900 font-medium">
           {{ isViewMode ? 'Detalle' : (isEditMode ? 'Editar' : 'Nuevo') }} Programa
         </span>
       </nav>
+
+      <!-- Título y botón Volver -->
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900">
           {{ isViewMode ? 'Detalle' : (isEditMode ? 'Editar' : 'Nuevo') }} Programa de Distribución
@@ -30,7 +29,6 @@
 
     <!-- Formulario -->
     <form [formGroup]="programsForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <!-- Sección de datos -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div class="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-200 to-indigo-300">
           <div class="flex items-center">
@@ -43,7 +41,7 @@
         </div>
         <div class="p-4">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <!-- Campo: Código -->
+            <!-- Campos generales -->
             <ng-container *ngFor="let field of [
               { id: 'programCode', label: 'Código del Programa', type: 'text', required: true },
               { id: 'programDate', label: 'Fecha', type: 'datetime-local', required: true },
@@ -57,10 +55,15 @@
                 <label [for]="field.id" class="block text-sm font-medium text-gray-700">
                   {{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span>
                 </label>
-                <input [type]="field.type" [id]="field.id" [formControlName]="field.id"
-                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  [ngClass]="{ 'border-red-300': isFieldInvalid(field.id) }"
-                  [readonly]="isViewMode" [disabled]="isViewMode" />
+                <input [type]="field.type"
+                       [id]="field.id"
+                       [formControlName]="field.id"
+                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                       [ngClass]="{ 'border-red-300': isFieldInvalid(field.id) }"
+                       [readonly]="isViewMode"
+                       [disabled]="isViewMode"
+                       [attr.min]="field.type === 'datetime-local' ? minDateTime : null"
+                />
                 <p *ngIf="getFieldError(field.id)" class="mt-1 text-sm text-red-600">
                   {{ getFieldError(field.id) }}
                 </p>

@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { organization, zones } from '../../../../../core/models/organization.model';
@@ -31,57 +39,80 @@ export class ScheduleFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.scheduleForm = this.fb.group({
-      organizationId: ['', Validators.required],
-      zoneId: ['', Validators.required],
-      scheduleName: ['', [Validators.required, Validators.maxLength(100)]],
-      daysOfWeek: [[], [Validators.required, Validators.minLength(1)]],
-      startTime: ['', Validators.required],
-      endTime: ['', Validators.required],
-      durationHours: ['']
+    this.scheduleForm = this.fb.group(
+      {
+        organizationId: ['', Validators.required],
+        zoneId: ['', Validators.required],
+        scheduleName: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ ]*$/)
+          ]
+        ],
+        daysOfWeek: [[], [Validators.required, Validators.minLength(1)]],
+        startTime: ['', Validators.required],
+        endTime: ['', Validators.required],
+        durationHours: ['']
+      },
+      { validators: this.validateStartEndTime() }
+    );
+  }
+
+  ngOnInit(): void {
+    Promise.all([this.loadOrganizations(), this.loadZones()])
+      .then(() => this.checkEditMode())
+      .catch(err => console.error('Error inicial:', err));
+  }
+
+  validateStartEndTime(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const startTime = group.get('startTime')?.value;
+      const endTime = group.get('endTime')?.value;
+
+      if (!startTime || !endTime) return null;
+
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+
+      const startTotal = startHour * 60 + startMin;
+      const endTotal = endHour * 60 + endMin;
+
+      return endTotal > startTotal ? null : { timeRangeInvalid: true };
+    };
+  }
+
+  loadOrganizations(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.organizationService.getAllO().subscribe({
+        next: (data) => {
+          this.organizations = data.filter(o => o.status === 'ACTIVE');
+          resolve();
+        },
+        error: (err) => {
+          console.error('Error al cargar organizaciones', err);
+          Swal.fire('Error', 'No se pudieron cargar las organizaciones', 'error');
+          reject(err);
+        }
+      });
     });
   }
 
- async ngOnInit(): Promise<void> {
-  try {
-    await Promise.all([this.loadOrganizations(), this.loadZones()]);
-   this.checkEditMode();
-  } catch (err) {
-    console.error('Error inicial:', err);
+  loadZones(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.organizationService.getAllZ().subscribe({
+        next: (data) => {
+          this.zones = data.filter(z => z.status === 'ACTIVE');
+          resolve();
+        },
+        error: (err) => {
+          console.error('Error al cargar zonas', err);
+          Swal.fire('Error', 'No se pudieron cargar las zonas', 'error');
+          reject(err);
+        }
+      });
+    });
   }
-}
-loadOrganizations(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    this.organizationService.getAllO().subscribe({
-      next: (data) => {
-        this.organizations = data.filter(o => o.status === 'ACTIVE');
-        resolve();
-      },
-      error: (err) => {
-        console.error('Error al cargar organizaciones', err);
-        Swal.fire('Error', 'No se pudieron cargar las organizaciones', 'error');
-        reject(err);
-      }
-    });
-  });
-}
-
-loadZones(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    this.organizationService.getAllZ().subscribe({
-      next: (data) => {
-        this.zones = data.filter(z => z.status === 'ACTIVE');
-        resolve();
-      },
-      error: (err) => {
-        console.error('Error al cargar zonas', err);
-        Swal.fire('Error', 'No se pudieron cargar las zonas', 'error');
-        reject(err);
-      }
-    });
-  });
-}
-
 
   checkEditMode() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -97,18 +128,15 @@ loadZones(): Promise<void> {
     this.distributionService.getByIdS(id).subscribe({
       next: (schedule) => {
         this.scheduleCode = schedule.scheduleCode;
-
-      this.scheduleForm.patchValue({
-  scheduleName: schedule.scheduleName,
-  daysOfWeek: schedule.daysOfWeek,
-  startTime: schedule.startTime,
-  endTime: schedule.endTime,
-  durationHours: schedule.durationHours,
-  organizationId: schedule.organizationId,
-  zoneId: schedule.zoneId
-});
-
-
+        this.scheduleForm.patchValue({
+          scheduleName: schedule.scheduleName,
+          daysOfWeek: schedule.daysOfWeek,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          durationHours: schedule.durationHours,
+          organizationId: schedule.organizationId,
+          zoneId: schedule.zoneId
+        });
         this.loading = false;
       },
       error: () => {
@@ -140,20 +168,18 @@ loadZones(): Promise<void> {
     const selectedDays = this.scheduleForm.get('daysOfWeek')?.value || [];
     return selectedDays.includes(day);
   }
- 
+
   onSubmit() {
     if (this.scheduleForm.invalid) {
       this.markFormGroupTouched();
+      if (this.scheduleForm.errors?.['timeRangeInvalid']
+) {
+        Swal.fire('Error', 'La hora de fin debe ser posterior a la hora de inicio', 'warning');
+      }
       return;
     }
 
     const formData = this.scheduleForm.value;
-
-    if (formData.startTime >= formData.endTime) {
-      Swal.fire('Error', 'La hora de inicio debe ser menor que la hora de fin', 'warning');
-      return;
-    }
-
     this.loading = true;
 
     const [startHour, startMin] = formData.startTime.split(':').map(Number);
@@ -241,6 +267,7 @@ loadZones(): Promise<void> {
       if (field.errors['required']) return 'Este campo es requerido';
       if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
       if (field.errors['min']) return 'Debe ser un número mayor que 0';
+      if (field.errors['pattern']) return 'Solo letras y espacios. Debe comenzar con una letra.';
     }
     return '';
   }

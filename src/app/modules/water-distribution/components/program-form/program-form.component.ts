@@ -50,22 +50,48 @@ export class ProgramFormComponent implements OnInit {
       scheduleId: ['', Validators.required],
       responsibleUserId: ['', Validators.required],
       status: ['', Validators.required],
-      observations: ['', Validators.maxLength(300)]
+      observations: ['', [
+  Validators.maxLength(300),
+  Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ ]*$/)
+]]
+
     });
   }
+minDateTime: string = '';
 
-  ngOnInit(): void {
-    this.programId = this.route.snapshot.paramMap.get('id');
-    const view = this.route.snapshot.data['viewMode'];
+ngOnInit(): void {
+  this.programId = this.route.snapshot.paramMap.get('id');
+  const view = this.route.snapshot.data['viewMode'];
 
-    this.loadInitialData();
+  this.minDateTime = this.getTodayDateTime(); // 🔽 Esto genera la fecha actual para el atributo min
 
-    if (this.programId) {
-      this.isViewMode = !!view;
-      this.isEditMode = !view;
-      this.loadProgram();
-    }
+  this.isViewMode = !!view;
+  this.isEditMode = !!this.programId && !view;
+
+  this.loadInitialData();
+
+  if (this.programId) {
+    this.loadProgram();
+  } else {
+    this.generateProgramCode(); // Solo si es nuevo
   }
+}
+
+// Esta función genera la fecha actual en formato datetime-local
+private getTodayDateTime(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+private generateProgramCode(): void {
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  this.programsForm.patchValue({ programCode: `PRG${random}` });
+}
 
   isFormValid(): boolean {
     return this.programsForm.valid;
@@ -83,6 +109,7 @@ export class ProgramFormComponent implements OnInit {
     const field = this.programsForm.get(fieldName);
     return !!(field && field.invalid && (field.touched || field.dirty));
   }
+
 
   onSubmit(): void {
     if (this.programsForm.invalid) {
