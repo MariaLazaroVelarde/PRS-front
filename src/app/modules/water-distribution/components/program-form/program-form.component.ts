@@ -10,6 +10,7 @@ import { User as ResponsibleUser } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/user.service';
 import { organization as Organization } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-program-form',
@@ -28,6 +29,7 @@ export class ProgramFormComponent implements OnInit {
   routes: Route[] = [];
   schedules: Schedule[] = [];
   responsible: ResponsibleUser[] = [];
+  minDateTime: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -51,47 +53,43 @@ export class ProgramFormComponent implements OnInit {
       responsibleUserId: ['', Validators.required],
       status: ['', Validators.required],
       observations: ['', [
-  Validators.maxLength(300),
-  Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ ]*$/)
-]]
-
+        Validators.maxLength(300),
+        Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ ]*$/)
+      ]]
     });
   }
-minDateTime: string = '';
 
-ngOnInit(): void {
-  this.programId = this.route.snapshot.paramMap.get('id');
-  const view = this.route.snapshot.data['viewMode'];
+  ngOnInit(): void {
+    this.programId = this.route.snapshot.paramMap.get('id');
+    const view = this.route.snapshot.data['viewMode'];
 
-  this.minDateTime = this.getTodayDateTime(); // 🔽 Esto genera la fecha actual para el atributo min
+    this.minDateTime = this.getTodayDateTime();
+    this.isViewMode = !!view;
+    this.isEditMode = !!this.programId && !view;
 
-  this.isViewMode = !!view;
-  this.isEditMode = !!this.programId && !view;
+    this.loadInitialData();
 
-  this.loadInitialData();
-
-  if (this.programId) {
-    this.loadProgram();
-  } else {
-    this.generateProgramCode(); // Solo si es nuevo
+    if (this.programId) {
+      this.loadProgram();
+    } else {
+      this.generateProgramCode();
+    }
   }
-}
 
-// Esta función genera la fecha actual en formato datetime-local
-private getTodayDateTime(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-  const hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
+  private getTodayDateTime(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
 
-private generateProgramCode(): void {
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  this.programsForm.patchValue({ programCode: `PRG${random}` });
-}
+  private generateProgramCode(): void {
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    this.programsForm.patchValue({ programCode: `PRG${random}` });
+  }
 
   isFormValid(): boolean {
     return this.programsForm.valid;
@@ -110,7 +108,6 @@ private generateProgramCode(): void {
     return !!(field && field.invalid && (field.touched || field.dirty));
   }
 
-
   onSubmit(): void {
     if (this.programsForm.invalid) {
       this.markFormGroupTouched(this.programsForm);
@@ -120,19 +117,32 @@ private generateProgramCode(): void {
     this.isSubmitting = true;
     const formData: DistributionProgram = this.prepareFormData();
 
-    console.log('✅ Payload enviado al backend:', JSON.stringify(formData, null, 2));
-
     const request = this.isEditMode
       ? this.programsService.updateProgram(this.programId!, formData)
       : this.programsService.createProgram(formData);
 
     request.subscribe({
       next: () => {
-        this.router.navigate(['/admin/distribution/programs']);
+        Swal.fire({
+          icon: 'success',
+          title: this.isEditMode ? 'Programa actualizado' : 'Programa creado',
+          text: this.isEditMode
+            ? 'El programa de distribución se actualizó correctamente.'
+            : 'El programa de distribución se creó correctamente.',
+          confirmButtonText: 'Aceptar'
+        }).then(() => {
+          this.router.navigate(['/admin/distribution/programs']);
+        });
       },
       error: (error) => {
-        console.error('❌ Error al guardar programa:', error);
         this.isSubmitting = false;
+        console.error('❌ Error al guardar programa:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar el programa.',
+          confirmButtonText: 'Cerrar'
+        });
       }
     });
   }
