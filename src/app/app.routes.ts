@@ -73,7 +73,14 @@ export const APP_ROUTES: Routes = [
                 loadComponent: () =>
                   import('./modules/water-distribution/components/program-form/program-form.component')
                     .then(c => c.ProgramFormComponent),
-              }
+              },
+              {
+  path: 'view/:id',
+  loadComponent: () =>
+    import('./modules/water-distribution/components/program-form/program-form.component')
+      .then(c => c.ProgramFormComponent),
+  data: { viewMode: true }  // ← Esto le dice al componente que es modo "ver"
+}
             ]
           },
           {

@@ -155,9 +155,10 @@ export class ProgramListComponent implements OnInit {
     }
   }
 
-  viewProgramsDetail(id: string): void {
-    this.router.navigate(['/admin/distribution/programDetail', id]);
-  }
+viewProgramsDetail(id: string): void {
+  this.router.navigate(['/admin/distribution/programs/view', id]);
+}
+
 
   updatePrograms(id: string): void {
    this.router.navigate(['/admin/distribution/programs/edit', id]);

@@ -21,6 +21,7 @@ import { OrganizationService } from '../../../../core/services/organization.serv
 export class ProgramFormComponent implements OnInit {
   programsForm: FormGroup;
   isEditMode = false;
+  isViewMode = false;
   isSubmitting = false;
   programId: string | null = null;
   organizations: Organization[] = [];
@@ -55,10 +56,13 @@ export class ProgramFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.programId = this.route.snapshot.paramMap.get('id');
+    const view = this.route.snapshot.data['viewMode'];
+
     this.loadInitialData();
 
     if (this.programId) {
-      this.isEditMode = true;
+      this.isViewMode = !!view;
+      this.isEditMode = !view;
       this.loadProgram();
     }
   }
@@ -70,10 +74,8 @@ export class ProgramFormComponent implements OnInit {
   getFieldError(fieldName: string): string {
     const field = this.programsForm.get(fieldName);
     if (!field || !field.errors) return '';
-
     if (field.errors['required']) return 'Este campo es requerido';
     if (field.errors['maxlength']) return `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
-
     return 'Campo inválido';
   }
 
@@ -82,88 +84,91 @@ export class ProgramFormComponent implements OnInit {
     return !!(field && field.invalid && (field.touched || field.dirty));
   }
 
-onSubmit(): void {
-  if (this.programsForm.invalid) {
-    this.markFormGroupTouched(this.programsForm);
-    return;
-  }
-
-  this.isSubmitting = true;
-  const formData: DistributionProgram = this.prepareFormData();
-
-  // 👇 Agrega esto
-  console.log('✅ Payload enviado al backend:', JSON.stringify(formData, null, 2));
-
-  const request = this.isEditMode
-    ? this.programsService.updateProgram(this.programId!, formData)
-    : this.programsService.createProgram(formData);
-
-  request.subscribe({
-    next: () => {
-      this.router.navigate(['/admin/programs']);
-    },
-    error: (error) => {
-      console.error('❌ Error al guardar programa:', error);
-      this.isSubmitting = false;
+  onSubmit(): void {
+    if (this.programsForm.invalid) {
+      this.markFormGroupTouched(this.programsForm);
+      return;
     }
-  });
-}
 
+    this.isSubmitting = true;
+    const formData: DistributionProgram = this.prepareFormData();
+
+    console.log('✅ Payload enviado al backend:', JSON.stringify(formData, null, 2));
+
+    const request = this.isEditMode
+      ? this.programsService.updateProgram(this.programId!, formData)
+      : this.programsService.createProgram(formData);
+
+    request.subscribe({
+      next: () => {
+        this.router.navigate(['/admin/distribution/programs']);
+      },
+      error: (error) => {
+        console.error('❌ Error al guardar programa:', error);
+        this.isSubmitting = false;
+      }
+    });
+  }
 
   goBack(): void {
     this.router.navigate(['/admin/programs']);
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched();
-    });
+    Object.values(formGroup.controls).forEach(control => control.markAsTouched());
   }
 
   private formatDateOnly(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toISOString().split('T')[0]; // Devuelve solo "YYYY-MM-DD"
-}
+    const date = new Date(dateStr);
+    return date.toISOString().split('T')[0];
+  }
 
-private formatTimeOnly(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toISOString().split('T')[1].substring(0, 5); // Devuelve solo "HH:mm"
-}
+  private formatTimeOnly(datetime: string): string {
+    if (!datetime) return '';
+    const date = new Date(datetime);
+    if (isNaN(date.getTime())) return '';
+    return date.toTimeString().slice(0, 5);
+  }
 
+  private toDatetimeLocal(date: string, time: string = '00:00'): string {
+    if (!date || !time) return '';
+    return `${date}T${time}`;
+  }
 
- private prepareFormData(): any {
-  const form = this.programsForm.value;
+  private prepareFormData(): any {
+    const form = this.programsForm.value;
+    const programDate = this.formatDateOnly(form.programDate);
 
-  const base = {
-    programCode: form.programCode,
-   programDate: this.formatDateOnly(form.programDate),
-plannedStartTime: this.formatTimeOnly(form.plannedStartTime),
-plannedEndTime: this.formatTimeOnly(form.plannedEndTime),
-actualStartTime: form.actualStartTime ? this.formatTimeOnly(form.actualStartTime) : null,
-actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : null,
-    organizationId: form.organizationId,
-    routeId: form.routeId || null,
-    scheduleId: form.scheduleId || null,
-    responsibleUserId: form.responsibleUserId || null,
-    status: form.status,
-    observations: form.observations
-  };
+    const base = {
+      programCode: form.programCode,
+      programDate,
+      plannedStartTime: this.formatTimeOnly(form.plannedStartTime),
+      plannedEndTime: this.formatTimeOnly(form.plannedEndTime),
+      actualStartTime: form.actualStartTime ? this.formatTimeOnly(form.actualStartTime) : null,
+      actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : null,
+      organizationId: form.organizationId,
+      routeId: form.routeId || null,
+      scheduleId: form.scheduleId || null,
+      responsibleUserId: form.responsibleUserId || null,
+      status: form.status,
+      observations: form.observations
+    };
 
-  // Solo incluye el ID si estás en modo edición
-  return this.isEditMode ? { ...base, id: this.programId! } : base;
-}
-
+    return this.isEditMode ? { ...base, id: this.programId! } : base;
+  }
 
   private loadProgram(): void {
     this.programsService.getProgramById(this.programId!).subscribe({
       next: (program) => {
+        const dateOnly = program.programDate;
+
         this.programsForm.patchValue({
           programCode: program.programCode,
-          programDate: this.formatDate(program.programDate),
-          plannedStartTime: this.formatDate(program.plannedStartTime),
-          plannedEndTime: this.formatDate(program.plannedEndTime),
-          actualStartTime: program.actualStartTime ? this.formatDate(program.actualStartTime) : '',
-          actualEndTime: program.actualEndTime ? this.formatDate(program.actualEndTime) : '',
+          programDate: this.toDatetimeLocal(dateOnly),
+          plannedStartTime: this.toDatetimeLocal(dateOnly, program.plannedStartTime),
+          plannedEndTime: this.toDatetimeLocal(dateOnly, program.plannedEndTime),
+          actualStartTime: program.actualStartTime ? this.toDatetimeLocal(dateOnly, program.actualStartTime) : '',
+          actualEndTime: program.actualEndTime ? this.toDatetimeLocal(dateOnly, program.actualEndTime) : '',
           organizationId: program.organizationId,
           routeId: program.routeId,
           scheduleId: program.scheduleId,
@@ -171,6 +176,10 @@ actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : nu
           status: program.status,
           observations: program.observations
         });
+
+        if (this.isViewMode) {
+          this.programsForm.disable();
+        }
       },
       error: (error) => {
         console.error('Error al cargar programa:', error);
@@ -178,28 +187,24 @@ actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : nu
     });
   }
 
-  private formatDate(dateString: string): string {
-    return new Date(dateString).toISOString().slice(0, 16);
-  }
-
   private loadInitialData(): void {
     this.organizationService.getAllO().subscribe({
-      next: (orgs) => this.organizations = orgs,
+      next: (orgs) => (this.organizations = orgs),
       error: (err) => console.error('Error cargando organizaciones:', err)
     });
 
     this.distributionService.getAllR().subscribe({
-      next: (routes) => this.routes = routes,
+      next: (routes) => (this.routes = routes),
       error: (err) => console.error('Error cargando rutas:', err)
     });
 
     this.distributionService.getAll().subscribe({
-      next: (schedules) => this.schedules = schedules,
+      next: (schedules) => (this.schedules = schedules),
       error: (err) => console.error('Error cargando horarios:', err)
     });
 
     this.userService.getAll().subscribe({
-      next: (res) => this.responsible = res,
+      next: (res) => (this.responsible = res),
       error: (err) => console.error('Error cargando responsables:', err)
     });
   }
