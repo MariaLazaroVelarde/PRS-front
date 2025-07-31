@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DistributionProgram } from '../../../../core/models/water-distribution.model';
-import { routes, schedules } from '../../../../core/models/distribution.model';
-import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { User } from '../../../../core/models/user.model';
+import { User, UserResponseDTO } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/user.service';
 import { organization } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import { FormsModule } from '@angular/forms';
+import { ProgramsService } from '../../../../core/services/water-distribution.service';
+import { routes, schedules } from '../../../../core/models/distribution.model';
 
 @Component({
   selector: 'app-program-list',
@@ -17,12 +17,13 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
+
 export class ProgramListComponent implements OnInit {
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
   routes: routes[] = [];
   schedules: schedules[] = [];
-  users: User[] = [];
+  users: UserResponseDTO[] = [];
   organization: organization[] = [];
   loading = false;
   showAlert = false;
@@ -77,8 +78,8 @@ export class ProgramListComponent implements OnInit {
   }
 
   private loadUsers(): void {
-    this.UserService.getAll().subscribe({
-      next: (data: User[]) => {
+    this.UserService.getAllUsers().subscribe({
+      next: (data: UserResponseDTO[]) => {
         console.log('Usuarios cargados:', data); // <- Agrega esto
         this.users = data;
       },
@@ -87,7 +88,7 @@ export class ProgramListComponent implements OnInit {
   }
 
   private loadOrganizations(): void {
-    this.OrganizationService.getAllO().subscribe({
+    this.OrganizationService.getAllOrganization().subscribe({
       next: (data: organization[]) => {
         console.log('Organizaciones cargados:', data); // <- Agrega esto
         this.organization = data;
@@ -121,8 +122,8 @@ export class ProgramListComponent implements OnInit {
   }
 
   getResponsibleName(responsibleUserId: string): string {
-  const user = this.users.find(u => u.responsibleUserId === responsibleUserId);
-  return user ? user.name : responsibleUserId;
+  const user = this.users.find(u => u.fullName === responsibleUserId);
+  return user ? user.fullName : responsibleUserId;
 }
 
 

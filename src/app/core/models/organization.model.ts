@@ -9,6 +9,7 @@ export interface organization{
 }
 
 export interface organizationCreate{
+      organizationCode:string;
       organizationName:string;
       address:string;
       phone:string;

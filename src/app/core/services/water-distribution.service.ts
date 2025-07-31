@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { DistributionProgram, DistributionProgramCreate, DistributionProgramUpdate } from '../models/water-distribution.model';
-import { ApiResponse } from '../models/distribution.model';
+import { ApiResponse } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgramsService {
 
-  private readonly apiPrograms = "https://laughing-zebra-9v6rwq7vjgxh79xw-8080.app.github.dev/api/v2/programs"
+  private readonly apiPrograms = "https://vg-ms-distribution-production.up.railway.app/api/v2/programs"
 
   constructor(private http: HttpClient) { }
 

@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
-import { fares, Status } from '../../../../../core/models/distribution.model';
-import { organization } from '../../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
 import { DistributionService } from '../../../../../core/services/distribution.service';
+import { fares } from '../../../../../core/models/distribution.model';
+import { organization } from '../../../../../core/models/organization.model';
+import { Status } from '../../../../../core/models/payment.model';
 
 @Component({
   selector: 'app-fare-list',
@@ -60,7 +61,7 @@ export class FareListComponent implements OnInit {
   }
 
   loadOrganizations(): void {
-    this.organizationService.getAllO().subscribe({
+    this.organizationService.getAllOrganization().subscribe({
       next: (data) => {
         this.organizations = data.filter(org => org.status === 'ACTIVE');
       },

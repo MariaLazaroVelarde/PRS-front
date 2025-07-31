@@ -1,6 +1,3 @@
-import { organization } from "./organization.model";
-import { schedules, routes } from "./distribution.model";
-import { User } from "./user.model";
 
 // distribution programas
 export interface DistributionProgram {

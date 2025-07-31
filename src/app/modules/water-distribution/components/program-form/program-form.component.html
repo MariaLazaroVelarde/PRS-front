@@ -119,8 +119,8 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 [disabled]="isViewMode">
                 <option value="">Seleccionar responsable</option>
-                <option *ngFor="let res of responsible" [value]="res.responsibleUserId">
-                  {{ res.name }}
+                <option *ngFor="let res of responsible" [value]="res.id">
+                  {{ res.fullName }}
                 </option>
               </select>
               <p *ngIf="getFieldError('responsibleUserId')" class="mt-1 text-sm text-red-600">{{ getFieldError('responsibleUserId') }}</p>

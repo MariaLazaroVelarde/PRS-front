@@ -2,7 +2,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http'; 
+
 function initializeTheme() {
   document.documentElement.classList.toggle(
     "dark",
@@ -22,11 +22,9 @@ const enhancedAppConfig = {
   ...appConfig,
   providers: [
     ...appConfig.providers,
-    provideAnimations(),
+    provideAnimations()
   ]
 };
 
 bootstrapApplication(AppComponent, enhancedAppConfig)
   .catch((err) => console.error(err));
-
-

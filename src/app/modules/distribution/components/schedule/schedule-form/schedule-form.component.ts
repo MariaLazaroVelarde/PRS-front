@@ -11,10 +11,10 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
-import { organization, zones } from '../../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
-import { schedulesCreate, schedulesUpdate } from '../../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../../core/services/distribution.service';
+import { schedulesUpdate, schedulesCreate } from '../../../../../core/models/distribution.model';
+import { organization, zones } from '../../../../../core/models/organization.model';
 
 @Component({
   selector: 'app-schedule-form',
@@ -84,7 +84,7 @@ export class ScheduleFormComponent implements OnInit {
 
   loadOrganizations(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.organizationService.getAllO().subscribe({
+      this.organizationService.getAllOrganization().subscribe({
         next: (data) => {
           this.organizations = data.filter(o => o.status === 'ACTIVE');
           resolve();
@@ -100,7 +100,7 @@ export class ScheduleFormComponent implements OnInit {
 
   loadZones(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.organizationService.getAllZ().subscribe({
+      this.organizationService.getAllZones().subscribe({
         next: (data) => {
           this.zones = data.filter(z => z.status === 'ACTIVE');
           resolve();

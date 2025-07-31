@@ -1,9 +1,8 @@
 <div *ngIf="isSidebarOpen && windowWidth < 1280" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
     style="transition: all 0.3s ease; animation: fadeIn 0.3s ease-out;" (click)="closeSidebar()">
 </div>
-
 <aside
-    class="fixed top-0 left-0 flex flex-col h-screen text-white border-r shadow-2xl bg-sky-950 dark:bg-gray-900 border-sky-800 dark:border-gray-700 w-64 z-50"
+    class="fixed top-0 left-0 z-50 flex flex-col w-64 h-screen text-white border-r shadow-2xl bg-sky-950 dark:bg-gray-900 border-sky-800 dark:border-gray-700"
     [ngClass]="{
     'transform translate-x-0': isSidebarOpen || windowWidth >= 1280,
     'transform -translate-x-full': !isSidebarOpen && windowWidth < 1280
@@ -28,7 +27,7 @@
     <div class="flex-1 py-4 overflow-y-auto sidebar-scroll">
         <nav>
             <ul class="px-3 space-y-2">
-                <li *ngIf="hasAnyRole([UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.CLIENT])">
+                <li *ngIf="hasAnyRole([RolesUsers.SUPER_ADMIN, RolesUsers.ADMIN, RolesUsers.CLIENT])">
                     <a [routerLink]="getDashboardRoute()"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -41,54 +40,132 @@
                     </a>
                 </li>
 
-
-                <li *ngIf="hasRole(UserRole.SUPERADMIN)">
+           <li *ngIf="hasRole(RolesUsers.ADMIN)">
                     <div class="relative">
-                        <button (click)="toggleOrganizationsDropdown()"
-                            class="flex items-center justify-between w-full px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
-                            [class.bg-sky-800]="isOrganizationsDropdownOpen"
-                            [class.dark:bg-gray-700]="isOrganizationsDropdownOpen">
+                        <button
+                            (click)="toggleInfrastructureDropdown()"
+                            class="flex items-center justify-between w-full px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 group"
+                            [class.bg-sky-800]="isInfrastructureDropdownOpen"
+                        >
                             <div class="flex items-center">
-                                <div
-                                    class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
-                                    <i class="text-base fas fa-building text-sky-200 dark:text-gray-300"></i>
+                                <div class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 group-hover:bg-sky-600">
+                                    <i class="text-base fas fa-box text-sky-200"></i>
                                 </div>
-                                <span class="font-medium">Organizaciones</span>
+                                <span class="font-medium">Infraestructura</span>
                             </div>
-                            <i class="text-sm transition-transform duration-200 fas fa-chevron-down"
-                                [class.rotate-180]="isOrganizationsDropdownOpen"></i>
+                            <i
+                                class="text-sm transition-transform duration-200 fas fa-chevron-down"
+                                [class.rotate-180]="isInfrastructureDropdownOpen"
+                            ></i>
                         </button>
-
-
-                        <div class="overflow-hidden transition-all duration-300"
-                            [class.max-h-0]="!isOrganizationsDropdownOpen"
-                            [class.max-h-96]="isOrganizationsDropdownOpen">
+                        <div
+                            class="overflow-hidden transition-all duration-300"
+                            [class.max-h-0]="!isInfrastructureDropdownOpen"
+                            [class.max-h-96]="isInfrastructureDropdownOpen"
+                        >
                             <div class="mt-2 ml-4 space-y-1">
-                                <a routerLink="/super-admin/organizations"
-                                    routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
-                                    class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
-                                    (click)="onOptionSelected()">
-                                    <div
-                                        class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
-                                        <i class="text-xs fas fa-list text-sky-200 dark:text-gray-400"></i>
+                                <a
+                                    routerLink="/admin/box-assignment"
+                                    routerLinkActive="bg-sky-700 shadow-md"
+                                    class="flex items-center py-2.5 px-4 text-sky-100 rounded-lg hover:bg-sky-700/70 transition-all duration-200 group text-sm"
+                                    (click)="onOptionSelected()"
+                                >
+                                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 group-hover:bg-sky-600/50">
+                                        <i class="text-xs fas fa-people-carry text-sky-200"></i>
                                     </div>
-                                    <span class="font-medium">Lista de Organizaciones</span>
+                                    <span class="font-medium">Asignación de Cajas</span>
                                 </a>
-                                <a routerLink="/organizations/headquarters"
-                                    routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
-                                    class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
-                                    (click)="onOptionSelected()">
-                                    <div
-                                        class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
-                                        <i class="text-xs fas fa-map-marker-alt text-sky-200 dark:text-gray-400"></i>
+                                <a
+                                    routerLink="/admin/box-transfer"
+                                    routerLinkActive="bg-sky-700 shadow-md"
+                                    class="flex items-center py-2.5 px-4 text-sky-100 rounded-lg hover:bg-sky-700/70 transition-all duration-200 group text-sm"
+                                    (click)="onOptionSelected()"
+                                >
+                                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 group-hover:bg-sky-600/50">
+                                        <i class="text-xs fas fa-exchange-alt text-sky-200"></i>
                                     </div>
-                                    <span class="font-medium">Sedes</span>
+                                    <span class="font-medium">Transferencia de Cajas</span>
+                                </a>
+                                <a
+                                    routerLink="/admin/water-box"
+                                    routerLinkActive="bg-sky-700 shadow-md"
+                                    class="flex items-center py-2.5 px-4 text-sky-100 rounded-lg hover:bg-sky-700/70 transition-all duration-200 group text-sm"
+                                    (click)="onOptionSelected()"
+                                >
+                                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 group-hover:bg-sky-600/50">
+                                        <i class="text-xs fas fa-tint text-sky-200"></i>
+                                    </div>
+                                    <span class="font-medium">Cajas de Agua</span>
                                 </a>
                             </div>
                         </div>
                     </div>
                 </li>
-                <li *ngIf="hasRole(UserRole.SUPERADMIN)">
+          <li *ngIf="hasRole(RolesUsers.SUPER_ADMIN)">
+                    <div class="relative">
+                        <button
+                            (click)="toggleOrganizationsDropdown()"
+                            class="flex items-center justify-between w-full px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
+                            [class.bg-sky-800]="isOrganizationsDropdownOpen"
+                            [class.dark:bg-gray-700]="isOrganizationsDropdownOpen"
+                        >
+                            <div class="flex items-center">
+                                <div class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
+                                    <i class="text-base fas fa-building text-sky-200 dark:text-gray-300"></i>
+                                </div>
+                                <span class="font-medium">Organizaciones</span>
+                            </div>
+                            <i
+                                class="text-sm transition-transform duration-200 fas fa-chevron-down"
+                                [class.rotate-180]="isOrganizationsDropdownOpen"
+                            ></i>
+                        </button>
+
+
+                        <div
+                            class="overflow-hidden transition-all duration-300"
+                            [class.max-h-0]="!isOrganizationsDropdownOpen"
+                            [class.max-h-96]="isOrganizationsDropdownOpen"
+                        >
+                            <div class="mt-2 ml-4 space-y-1">
+                                <a
+                                    routerLink="/super-admin/organizations"
+                                    routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                                    class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                                    (click)="onOptionSelected()"
+                                >
+                                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                                        <i class="text-xs fas fa-list text-sky-200 dark:text-gray-400"></i>
+                                    </div>
+                                    <span class="font-medium"> Organizaciones</span>
+                                </a>
+                                <a
+                                    routerLink="/super-admin/organizations/zonas"
+                                    routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                                    class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                                    (click)="onOptionSelected()"
+                                >
+                                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                                        <i class="text-xs fas fa-map-marker-alt text-sky-200 dark:text-gray-400"></i>
+                                    </div>
+                                    <span class="font-medium">Zonas</span>
+                                </a>
+                                <a
+                                routerLink="/super-admin/organizations/street"
+                                routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                                class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                                (click)="onOptionSelected()"
+                            >
+                                <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                                    <i class="text-xs fas fa-map-marker-alt text-sky-200 dark:text-gray-400"></i>
+                                </div>
+                                <span class="font-medium">Calles</span>
+                            </a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li *ngIf="hasRole(RolesUsers.SUPER_ADMIN)">
                     <a routerLink="/reports/general"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -100,9 +177,7 @@
                         <span class="font-medium">Reportes Generales</span>
                     </a>
                 </li>
-
-
-                <li *ngIf="hasRole(UserRole.SUPERADMIN)">
+                <li *ngIf="hasRole(RolesUsers.SUPER_ADMIN)">
                     <a routerLink="/super-admin/system-settings"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -114,8 +189,7 @@
                         <span class="font-medium">Configuración</span>
                     </a>
                 </li>
-
-                <li *ngIf="hasRole(UserRole.ADMIN)">
+                <li *ngIf="hasRole(RolesUsers.ADMIN)">
                     <a routerLink="/admin/users"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -128,8 +202,7 @@
                     </a>
                 </li>
 
-
-                <li *ngIf="hasRole(UserRole.ADMIN)">
+                <li *ngIf="hasRole(RolesUsers.ADMIN)">
                     <a routerLink="/admin/payments"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -141,35 +214,7 @@
                         <span class="font-medium">Pagos</span>
                     </a>
                 </li>
-
-
-                <li *ngIf="hasRole(UserRole.ADMIN)">
-                    <a routerLink="/admin/reports"
-                        routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
-                        class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
-                        (click)="onOptionSelected()">
-                        <div
-                            class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
-                            <i class="text-base fas fa-file-alt text-sky-200 dark:text-gray-300"></i>
-                        </div>
-                        <span class="font-medium">Reportes</span>
-                    </a>
-                </li>
-
-
-                <li *ngIf="hasRole(UserRole.ADMIN)">
-                    <a routerLink="/admin/incidents"
-                        routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
-                        class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
-                        (click)="onOptionSelected()">
-                        <div
-                            class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
-                            <i class="text-base fas fa-exclamation-triangle text-sky-200 dark:text-gray-300"></i>
-                        </div>
-                        <span class="font-medium">Incidencias</span>
-                    </a>
-                </li>
-                <li *ngIf="hasRole(UserRole.ADMIN)" class="group">
+                 <li *ngIf="hasRole(RolesUsers.ADMIN)" class="group">
                     <div class="flex items-center px-4 py-3 text-white cursor-pointer rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70"
                         (click)="toggleDistributionMenu()">
                         <div
@@ -197,22 +242,171 @@
                         </li>
                     </ul>
                 </li>
-
-                <li *ngIf="hasRole(UserRole.ADMIN)">
-                    <a routerLink="/admin/complaints"
+                   <li *ngIf="hasRole(RolesUsers.ADMIN)">
+                    <div class="relative">
+                      <button
+                        (click)="toggleWaterQualityDropdown()"
+                        class="flex items-center justify-between w-full px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
+                        [class.bg-sky-800]="isWaterQualityDropdownOpen"
+                        [class.dark:bg-gray-700]="isWaterQualityDropdownOpen"
+                      >
+                        <div class="flex items-center">
+                          <div class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
+                            <i class="text-base fas fa-tint text-sky-200 dark:text-gray-300"></i>
+                          </div>
+                          <span class="font-medium">Calidad de Agua</span>
+                        </div>
+                        <i
+                          class="text-sm transition-transform duration-200 fas fa-chevron-down"
+                          [class.rotate-180]="isWaterQualityDropdownOpen"
+                        ></i>
+                      </button>
+                  
+                      <div
+                        class="overflow-hidden transition-all duration-300"
+                        [class.max-h-0]="!isWaterQualityDropdownOpen"
+                        [class.max-h-96]="isWaterQualityDropdownOpen"
+                      >
+                        <div class="mt-2 ml-4 space-y-1">
+                  
+                          <!-- Cloro -->
+                          <a
+                            routerLink="/admin/water-quality"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-flask text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Control de Cloro</span>
+                          </a>
+                  
+                          <!-- Análisis -->
+                          <a
+                            routerLink="/admin/water-quality/test"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-vials text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Análisis</span>
+                          </a>
+                  
+                          <!-- Incidencias --
+                          <a
+                            routerLink="/admin/water-quality/incident"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-exclamation-triangle text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Incidencias</span>
+                          </a>
+                 Puntos de analisis -->
+                    <a
+                    routerLink="/admin/water-quality/testing"
+                    routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                    class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                    (click)="onOptionSelected()"
+                  >
+                    <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                      <i class="text-xs fas fa-map-marker-alt text-sky-200 dark:text-gray-400"></i>
+                    </div>
+                    <span class="font-medium">Puntos de Analisis</span>
+                  </a>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  
+                <li *ngIf="hasRole(RolesUsers.ADMIN)">
+                    <a routerLink="/admin/reports"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
                         (click)="onOptionSelected()">
                         <div
                             class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
-                            <i class="text-base fas fa-comments text-sky-200 dark:text-gray-300"></i>
+                            <i class="text-base fas fa-file-alt text-sky-200 dark:text-gray-300"></i>
                         </div>
-                        <span class="font-medium">Reclamos</span>
+                        <span class="font-medium">Reportes</span>
                     </a>
                 </li>
 
+                <li *ngIf="hasRole(RolesUsers.ADMIN)" class="group">
+                    <div class="relative">
+                      <button
+                        (click)="toggleComplaintsIncidentsDropdown()"
+                        class="flex items-center justify-between w-full px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
+                        [class.bg-sky-800]="isComplaintsIncidentsDropdownOpen"
+                        [class.dark:bg-gray-700]="isComplaintsIncidentsDropdownOpen"
+                      >
+                        <div class="flex items-center">
+                          <div class="flex items-center justify-center w-10 h-10 mr-3 transition-colors rounded-lg bg-sky-700/50 dark:bg-gray-600/50 group-hover:bg-sky-600 dark:group-hover:bg-gray-600">
+                            <i class="text-base fas fa-exclamation-triangle text-sky-200 dark:text-gray-300"></i>
+                          </div>
+                          <span class="font-medium">Incidencias</span>
+                        </div>
+                        <i
+                          class="text-sm transition-transform duration-200 fas fa-chevron-down"
+                          [class.rotate-180]="isComplaintsIncidentsDropdownOpen"
+                        ></i>
+                      </button>
 
-                <li *ngIf="hasRole(UserRole.CLIENT)">
+                      <div
+                        class="overflow-hidden transition-all duration-300"
+                        [class.max-h-0]="!isComplaintsIncidentsDropdownOpen"
+                        [class.max-h-96]="isComplaintsIncidentsDropdownOpen"
+                      >
+                        <div class="mt-2 ml-4 space-y-1">
+                          <!-- Tipo de Incidencias -->
+                          <a
+                            routerLink="/admin/complaints-incidents/incident-types"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-tasks text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Tipos de Incidencia</span>
+                          </a>
+
+                          <!-- Listar Incidencias -->
+                          <a
+                            routerLink="/admin/complaints-incidents/incidents"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-exclamation-triangle text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Incidencias</span>
+                          </a>
+
+                          <!-- Resoluciones de Incidencias -->
+                          <!-- <a
+                            routerLink="/admin/complaints-incidents/incident-resolutions"
+                            routerLinkActive="bg-sky-700 dark:bg-gray-600 shadow-md"
+                            class="flex items-center py-2.5 px-4 text-sky-100 dark:text-gray-300 rounded-lg hover:bg-sky-700/70 dark:hover:bg-gray-600/70 transition-all duration-200 group text-sm"
+                            (click)="onOptionSelected()"
+                          >
+                            <div class="flex items-center justify-center w-8 h-8 mr-3 rounded-md bg-sky-600/30 dark:bg-gray-500/30 group-hover:bg-sky-600/50 dark:group-hover:bg-gray-500/50">
+                              <i class="text-xs fas fa-check-circle text-sky-200 dark:text-gray-400"></i>
+                            </div>
+                            <span class="font-medium">Resoluciones de Incidencias</span>
+                          </a> -->
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  
+                <li *ngIf="hasRole(RolesUsers.CLIENT)">
                     <a routerLink="/client/my-payments"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -225,8 +419,7 @@
                     </a>
                 </li>
 
-
-                <li *ngIf="hasRole(UserRole.CLIENT)">
+                <li *ngIf="hasRole(RolesUsers.CLIENT)">
                     <a routerLink="/client/my-account"
                         routerLinkActive="bg-sky-800 dark:bg-gray-700 shadow-lg ring-1 ring-sky-600 dark:ring-gray-600"
                         class="flex items-center px-4 py-3 text-white transition-all duration-200 rounded-xl hover:bg-sky-800/70 dark:hover:bg-gray-700/70 group"
@@ -242,8 +435,6 @@
         </nav>
     </div>
 
-
-    <!-- Footer fijo con botones - FIXED BOTTOM -->
     <div class="flex-shrink-0 p-4 border-t border-sky-800/50 dark:border-gray-700/50">
         <div class="space-y-3">
             <button

@@ -4,13 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DistributionProgram } from '../../../../core/models/water-distribution.model';
 import { routes as Route, schedules as Schedule } from '../../../../core/models/distribution.model';
-import { ProgramsService } from '../../../../core/services/water-distribution.service';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { User as ResponsibleUser } from '../../../../core/models/user.model';
+import { User as ResponsibleUser, UserResponseDTO } from '../../../../core/models/user.model';
 import { UserService } from '../../../../core/services/user.service';
 import { organization as Organization } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import Swal from 'sweetalert2';
+import { ProgramsService } from '../../../../core/services/water-distribution.service';
 
 @Component({
   selector: 'app-program-form',
@@ -28,7 +28,7 @@ export class ProgramFormComponent implements OnInit {
   organizations: Organization[] = [];
   routes: Route[] = [];
   schedules: Schedule[] = [];
-  responsible: ResponsibleUser[] = [];
+  responsible: UserResponseDTO[] = [];
   minDateTime: string = '';
 
   constructor(
@@ -225,7 +225,7 @@ export class ProgramFormComponent implements OnInit {
   }
 
   private loadInitialData(): void {
-    this.organizationService.getAllO().subscribe({
+    this.organizationService.getAllOrganization().subscribe({
       next: (orgs) => (this.organizations = orgs),
       error: (err) => console.error('Error cargando organizaciones:', err)
     });
@@ -240,7 +240,7 @@ export class ProgramFormComponent implements OnInit {
       error: (err) => console.error('Error cargando horarios:', err)
     });
 
-    this.userService.getAll().subscribe({
+    this.userService.getAllUsers().subscribe({
       next: (res) => (this.responsible = res),
       error: (err) => console.error('Error cargando responsables:', err)
     });

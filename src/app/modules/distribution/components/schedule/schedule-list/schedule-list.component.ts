@@ -6,8 +6,9 @@ import Swal from 'sweetalert2';
 
 import { DistributionService } from '../../../../../core/services/distribution.service';
 import { OrganizationService } from '../../../../../core/services/organization.service';
-import { schedules, Status } from '../../../../../core/models/distribution.model';
+import { schedules } from '../../../../../core/models/distribution.model';
 import { organization, zones } from '../../../../../core/models/organization.model';
+import { Status } from '../../../../../core/models/payment.model';
 
 @Component({
   selector: 'app-schedule-list',
@@ -55,7 +56,7 @@ export class ScheduleListComponent implements OnInit {
   }
 
   loadOrganizations(): void {
-    this.organizationService.getAllO().subscribe({
+    this.organizationService.getAllOrganization().subscribe({
       next: (data) => {
         this.organizations = data.filter(o => o.status === 'ACTIVE');
       },
@@ -67,7 +68,7 @@ export class ScheduleListComponent implements OnInit {
   }
 
   loadZones(): void {
-    this.organizationService.getAllZ().subscribe({
+    this.organizationService.getAllZones().subscribe({
       next: (data) => {
         this.zones = data.filter(z => z.status === 'ACTIVE');
       },

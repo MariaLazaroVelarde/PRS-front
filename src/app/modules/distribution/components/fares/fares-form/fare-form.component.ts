@@ -4,10 +4,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
-import { fares, faresCreate, faresUpdate } from '../../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../../core/services/distribution.service';
-import { organization } from '../../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../../core/services/organization.service';
+import { fares, faresUpdate, faresCreate } from '../../../../../core/models/distribution.model';
+import { organization } from '../../../../../core/models/organization.model';
 
 @Component({
   selector: 'app-fare-form',
@@ -77,7 +77,7 @@ export class FareFormComponent implements OnInit {
   }
 
   loadOrganizations() {
-    this.organizationService.getAllO().subscribe({
+    this.organizationService.getAllOrganization().subscribe({
       next: (data) => {
         this.organizations = data.filter(org => org.status === 'ACTIVE');
       },
