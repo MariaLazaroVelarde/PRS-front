@@ -9,7 +9,7 @@ import { ApiResponse } from '../models/auth.model';
 })
 export class ProgramsService {
 
-  private readonly apiPrograms = "https://vg-ms-distribution-production.up.railway.app/api/v2/programs"
+  private readonly apiPrograms = "https://lab.vallegrande.edu.pe/jass/ms-distribution/api/v2/programs"
 
   constructor(private http: HttpClient) { }
 
