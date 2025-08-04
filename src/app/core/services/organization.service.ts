@@ -19,11 +19,15 @@ export class OrganizationService {
   constructor(private http: HttpClient) { }
 
   getAllOrganization() {
-    return this.http.get<organization[]>(this.apiUrl.organizations);
+    return this.http.get<ApiResponse<organization[]>>(this.apiUrl.organizations).pipe(
+      map(response => response.data)
+    );
   }
 
   getOrganizationById(id: string) {
-    return this.http.get<organization>(`${this.apiUrl.organizations}/${id}`);
+    return this.http.get<ApiResponse<organization>>(`${this.apiUrl.organizations}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
 
@@ -41,13 +45,13 @@ export class OrganizationService {
 
 
   deleteOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/desactivate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/delete`, {}).pipe(
       map(response => response.data)
     );
   }
 
   restoreOrganization(id: string): Observable<void> {
-    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/activate`, {}).pipe(
+    return this.http.patch<ApiResponse<void>>(`${this.apiUrl.organizations}/${id}/restore`, {}).pipe(
       map(response => response.data)
     );
   }
@@ -55,11 +59,15 @@ export class OrganizationService {
   // Metode zones 
 
   getAllZones() {
-    return this.http.get<zones[]>(this.apiUrl.zonas);
+    return this.http.get<ApiResponse<zones[]>>(this.apiUrl.zonas).pipe(
+      map(response => response.data)
+    );
   }
 
   getZoneById(id: string) {
-    return this.http.get<zones>(`${this.apiUrl.zonas}/${id}`);
+    return this.http.get<ApiResponse<zones>>(`${this.apiUrl.zonas}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
   createZones(zone: zonesCreate): Observable<zones> {
