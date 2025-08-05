@@ -9,5 +9,5 @@ export const environment = {
      street: 'https://lab.vallegrande.edu.pe/jass/ms-organizations/api/streets',
      qualityTest: 'https://lab.vallegrande.edu.pe/jass/ms-water-quality/api/v2/qualitytests',
      users: 'https://lab.vallegrande.edu.pe/jass/ms-user/api/v1/api/v1/users/all',
-     incidents: 'https://vg-ms-claims-production.up.railway.app/api/v1'
+     incidents: 'https://vg-ms-claims-production.up.railway.app/api/v1',
 };

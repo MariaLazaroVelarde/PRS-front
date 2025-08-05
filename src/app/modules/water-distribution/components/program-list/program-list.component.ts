@@ -93,16 +93,22 @@ export class ProgramListComponent implements OnInit {
     });
   }
 
-  private loadUsers(): void {
-    this.userService.getAllUsers().subscribe({
-      next: (data: UserResponseDTO[]) => {
-        this.users = data;
-        this.userMap.clear();
-        data.forEach(u => this.userMap.set(u.userId, u.fullName));
-      },
-      error: (error: any) => console.error('Error al cargar usuarios:', error)
-    });
-  }
+private loadUsers(): void {
+  this.userService.getAllUsers().subscribe({
+    next: (data: UserResponseDTO[]) => {
+      console.log('Usuarios recibidos:', data); // Verifica estructura
+      this.users = data;
+      this.userMap.clear();
+
+      data.forEach(u => {
+        console.log('Mapeando usuario:', u.id, '->', u.fullName); // Asegúrate de usar 'id' si así viene del backend
+        this.userMap.set(u.id, u.fullName); // Mapear correctamente
+      });
+    },
+    error: (error: any) => console.error('Error al cargar usuarios:', error)
+  });
+}
+
 
   private loadOrganizations(): void {
     this.organizationService.getAllOrganization().subscribe({
@@ -147,9 +153,12 @@ export class ProgramListComponent implements OnInit {
     return this.programs.filter(p => p.status === 'CANCELLED').length;
   }
 
-  getResponsibleName(responsibleUserId: string): string {
-    return this.userMap.get(responsibleUserId) || responsibleUserId;
-  }
+getResponsibleName(responsibleUserId: string): string {
+  const name = this.userMap.get(responsibleUserId);
+  console.log('Buscando responsable:', responsibleUserId, '=>', name);
+  return name || responsibleUserId;
+}
+
 
   getOrganizationName(organizationId: string): string {
     return this.organizationMap.get(organizationId) || organizationId;
