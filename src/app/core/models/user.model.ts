@@ -93,6 +93,7 @@ export interface UserCreateDTO {
 }
 
 export interface UserResponseDTO {
+     userId: string;
      id: string;
      organizationId: string;
      userCode: string;
