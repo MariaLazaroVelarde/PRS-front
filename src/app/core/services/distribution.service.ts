@@ -3,6 +3,10 @@ import { Injectable } from '@angular/core';
 import { fares, faresCreate, faresUpdate, schedules, schedulesCreate, schedulesUpdate, routes } from '../models/distribution.model';
 import { map, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { organization, zones } from '../models/organization.model';
+import { UserResponseDTO } from '../models/user.model';
+import { ApiService } from './api.service';
+import { AuthService } from '../auth/services/auth.service';
 
 interface ApiResponse<T> {
   status: boolean,
@@ -19,6 +23,10 @@ export class DistributionService {
   private apiFares = `${environment.distribution}/fare`;
   private apiSchedules = `${environment.distribution}/schedules`;
   private apiRoutes = `${environment.distribution}/routes`;
+
+  private apiUrl = environment
+  private apiService!: ApiService;
+  private authService!: AuthService;
 
   constructor(private http: HttpClient) { }
 
@@ -152,9 +160,31 @@ export class DistributionService {
     );
   }
 
-  // 🔹 ZONES (pendiente)
-  getZones() {
-    throw new Error('Method not implemented.');
+  updateR(id: string, route: routes): Observable<routes> {
+    return this.http.put<ApiResponse<routes>>(`${this.apiRoutes}/${id}`, route).pipe(
+      map(response => response.data)
+    );
   }
 
+  // ZONES (pendiente)
+  getAllZones() {
+    return this.http.get<ApiResponse<zones[]>>(this.apiUrl.zonas).pipe(
+      map(response => response.data)
+    );
+  }
+
+  getAllOrganization() {
+    return this.http.get<ApiResponse<organization[]>>(this.apiUrl.organizations).pipe(
+      map(response => response.data)
+    );
+  }
+
+  getAllUsers(): Observable<UserResponseDTO[]> {
+    const organizationId = this.authService.getCurrentOrganizationId();
+    if (!organizationId) {
+      throw new Error('No se encontró ID de organización');
+    }
+
+    return this.apiService.get<UserResponseDTO[]>(`/users/organization/${organizationId}`);
+  }
 }

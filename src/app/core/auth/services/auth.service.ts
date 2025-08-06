@@ -1,4 +1,5 @@
 export class AuthService {
+  getCurrentOrganizationId: any;
   
   isLoggedIn(): boolean {
     return !!localStorage.getItem('currentUser');

@@ -12,68 +12,85 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-]})
+  ]
+})
 export class RoutesListComponent implements OnInit {
   private router = inject(Router);
   private routesService = inject(DistributionService);
 
   allRoutes: routes[] = [];
   filteredRoutes: routes[] = [];
-  users: any[] = []; // Asegúrate de cargar esto desde el backend si aplica
+  users: any[] = []; // 
+  organizations: any[] = []; //
 
-  // 🔹 Filtros
+  // Mapas para búsquedas rápidas
+  private organizationMap = new Map<string, string>();
+  private userMap = new Map<string, string>();
+
+  // Filtros
   searchTerm: string = '';
   selectedStatus: 'activo' | 'inactivo' = 'activo';
 
-  // 🔹 Alertas
+  // Alertas
   showAlert: boolean = false;
   alertType: 'success' | 'error' | 'info' = 'success';
   alertMessage: string = '';
-  organizations: any;
-  loading: boolean | undefined;
-  zones: any;
+  loading: boolean = false;
 
   ngOnInit() {
     this.loadRoutes();
+    this.loadOrganizations();
+    this.loadUsers();
   }
 
-loadRoutes() {
-  this.loading = true;
-  this.routesService.getAllR().subscribe({
-    next: (routes: routes[]) => {
-      this.allRoutes = routes;
-      this.applyFilters();
-      this.loading = false;
-    },
-    error: () => {
-      this.showErrorAlert('Error al cargar las rutas.');
-      this.loading = false;
-    }
-  });
-}
+  // Cargar rutas
+  loadRoutes() {
+    this.loading = true;
+    this.routesService.getAllR().subscribe({
+      next: (routes: routes[]) => {
+        this.allRoutes = routes;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: () => {
+        this.showErrorAlert('Error al cargar las rutas.');
+        this.loading = false;
+      }
+    });
+  }
 
+  loadOrganizations() {
+    this.routesService.getAllOrganization().subscribe({
+      next: (orgs: any[]) => {
+        this.organizations = orgs; // guardas array
+      },
+      error: () => {
+        this.showErrorAlert('Error al cargar organizaciones.');
+      }
+    });
+  }
 
-  // 🔹 Contadores
+  loadUsers() {
+    this.routesService.getAllUsers().subscribe({
+      next: (users: any[]) => {
+        this.users = users; // guardas array
+      },
+      error: () => {
+        this.showErrorAlert('Error al cargar responsables.');
+      }
+    });
+  }
+
+  // Contadores
   getActiveRCount(): number {
     return this.allRoutes.filter(route => route.status === Status.ACTIVE).length;
   }
-  
-getNameOrganization(id: string): string {
-  if (!this.organizations) {
-    console.warn('Lista de organizaciones aún no cargada');
-    return 'Desconocido';
-  }
-
-  const org = this.organizations.find((o: { organizationId: string; }) => o.organizationId === id);
-  return org?.organizationName || 'Desconocido';
-}
-
 
   getInactiveRCount(): number {
     return this.allRoutes.filter(route => route.status === Status.INACTIVE).length;
   }
 
-  // 🔹 Filtros
+  // Filtros
   onSearch() {
     this.applyFilters();
   }
@@ -85,16 +102,47 @@ getNameOrganization(id: string): string {
   private applyFilters() {
     this.filteredRoutes = this.allRoutes.filter(route => {
       const matchesSearch = route.routeName.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const isActive = route.status === Status.ACTIVE;
-      const isInactive = route.status === Status.INACTIVE;
-      const matchesStatus = this.selectedStatus === 'activo' ? isActive : isInactive;
+      const matchesStatus = this.selectedStatus === 'activo'
+        ? route.status === Status.ACTIVE
+        : route.status === Status.INACTIVE;
       return matchesSearch && matchesStatus;
     });
   }
 
-  // 🔹 Acciones
+  // Acciones
   addNewRoute(): void {
     this.router.navigate(['/distributions/routes/new']);
+  }
+
+  editRoute(routeId: string): void {
+    this.router.navigate([`/distributions/routes/edit/${routeId}`]);
+  }
+
+  deactivateRoute(route: routes): void {
+    const updatedRoute = { ...route, status: Status.INACTIVE };
+
+    this.routesService.updateR(route.id, updatedRoute).subscribe({
+      next: () => {
+        route.status = Status.INACTIVE;
+        this.showSuccessAlert('Ruta desactivada correctamente.');
+        this.applyFilters();
+      },
+      error: () => {
+        this.showErrorAlert('Error al desactivar la ruta.');
+      }
+    });
+  }
+
+  activateRoute(route: routes) {
+    const updatedRoute = { ...route, status: Status.ACTIVE };
+
+    this.routesService.updateR(route.id, updatedRoute).subscribe({
+      next: (res) => {
+        this.showSuccessAlert('Ruta activada correctamente.');
+        this.loadRoutes(); // recarga la lista
+      },
+      error: () => this.showErrorAlert('Error al activar la ruta.')
+    });
   }
 
   trackByRouteId(index: number, route: routes): string {
@@ -103,11 +151,6 @@ getNameOrganization(id: string): string {
 
   getZoneNames(zones: any[]): string {
     return zones.map(zone => `Zona ${zone.order}`).join(', ');
-  }
-
-  getUserName(userId: string): string {
-    const user = this.users.find(u => u.id === userId);
-    return user ? user.name : 'Sin asignar';
   }
 
   // 🔹 Alertas
@@ -132,18 +175,30 @@ getNameOrganization(id: string): string {
     this.alertMessage = message;
     this.showAlert = true;
   }
-  getStatusClass(status: Status): string {
-  return status === Status.ACTIVE
-    ? 'text-green-700 bg-green-100'
-    : 'text-red-700 bg-red-100';
-}
 
-getStatusLabel(status: Status): string {
-  switch (status) {
-    case Status.ACTIVE: return 'Activo';
-    case Status.INACTIVE: return 'Inactivo';
-    default: return 'Desconocido';
+  // 🔹 Estados visuales
+  getStatusClass(status: Status): string {
+    return status === Status.ACTIVE
+      ? 'text-green-700 bg-green-100'
+      : 'text-red-700 bg-red-100';
   }
-}
+
+  getStatusLabel(status: Status): string {
+    switch (status) {
+      case Status.ACTIVE: return 'Activo';
+      case Status.INACTIVE: return 'Inactivo';
+      default: return 'Desconocido';
+    }
+  }
+
+  getOrganizationName(organizationId: string): string {
+    const org = this.organizations.find((o: any) => o.organizationId === organizationId);
+    return org ? org.organizationName : organizationId;
+  }
+
+  getResponsibleName(responsibleUserId: string): string {
+    const user = this.users.find((u: any) => u.id === responsibleUserId);
+    return user ? user.name : responsibleUserId;
+  }
 
 }
