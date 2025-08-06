@@ -46,7 +46,7 @@ export class ProgramListComponent implements OnInit {
     private userService: UserService,
     private organizationService: OrganizationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadPrograms();
@@ -93,22 +93,21 @@ export class ProgramListComponent implements OnInit {
     });
   }
 
-private loadUsers(): void {
-  this.userService.getAllUsers().subscribe({
-    next: (data: UserResponseDTO[]) => {
-      console.log('Usuarios recibidos:', data); // Verifica estructura
-      this.users = data;
-      this.userMap.clear();
+  private loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data: UserResponseDTO[]) => {
+        console.log('Usuarios recibidos:', data); // Verifica estructura
+        this.users = data;
+        this.userMap.clear();
 
-      data.forEach(u => {
-        console.log('Mapeando usuario:', u.id, '->', u.fullName); // Asegúrate de usar 'id' si así viene del backend
-        this.userMap.set(u.id, u.fullName); // Mapear correctamente
-      });
-    },
-    error: (error: any) => console.error('Error al cargar usuarios:', error)
-  });
-}
-
+        data.forEach(u => {
+          console.log('Mapeando usuario:', u.id, '->', u.fullName); // Asegúrate de usar 'id' si así viene del backend
+          this.userMap.set(u.id, u.fullName); // Mapear correctamente
+        });
+      },
+      error: (error: any) => console.error('Error al cargar usuarios:', error)
+    });
+  }
 
   private loadOrganizations(): void {
     this.organizationService.getAllOrganization().subscribe({
@@ -131,8 +130,11 @@ private loadUsers(): void {
 
   private filterPrograms(): void {
     this.filteredPrograms = this.programs.filter(program => {
-      const matchesSearch = !this.searchTerm ||
-        program.programCode.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const searchTermLower = this.searchTerm.toLowerCase();
+
+      const matchesSearch =
+        program.programCode.toLowerCase().includes(searchTermLower) ||
+        program.programDate.toLowerCase().includes(searchTermLower)
 
       const matchesStatus = this.selectedStatus === 'todos' ||
         program.status === this.selectedStatus;
@@ -153,12 +155,11 @@ private loadUsers(): void {
     return this.programs.filter(p => p.status === 'CANCELLED').length;
   }
 
-getResponsibleName(responsibleUserId: string): string {
-  const name = this.userMap.get(responsibleUserId);
-  console.log('Buscando responsable:', responsibleUserId, '=>', name);
-  return name || responsibleUserId;
-}
-
+  getResponsibleName(responsibleUserId: string): string {
+    const name = this.userMap.get(responsibleUserId);
+    console.log('Buscando responsable:', responsibleUserId, '=>', name);
+    return name || responsibleUserId;
+  }
 
   getOrganizationName(organizationId: string): string {
     return this.organizationMap.get(organizationId) || organizationId;

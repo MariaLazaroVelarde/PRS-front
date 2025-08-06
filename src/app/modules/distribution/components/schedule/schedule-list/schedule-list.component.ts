@@ -34,7 +34,7 @@ export class ScheduleListComponent implements OnInit {
     private distributionService: DistributionService,
     private organizationService: OrganizationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSchedules();
@@ -102,8 +102,8 @@ export class ScheduleListComponent implements OnInit {
   onStatusChange(): void {
     this.applyFilters();
   }
-  
-  
+
+
 
   getStatusLabel(status: string): string {
     return status === Status.ACTIVE ? 'Activo' : 'Inactivo';
@@ -177,16 +177,16 @@ export class ScheduleListComponent implements OnInit {
     this.showAlert = false;
   }
 
-editSchedule(scheduleCode: string) {
-  this.router.navigate(['/admin/distribution/schedule/edit', scheduleCode]);
-}
+  editSchedule(scheduleCode: string) {
+    this.router.navigate(['/admin/distribution/schedule/edit', scheduleCode]);
+  }
 
 
 
-addNewSchedule() {
-  console.log('Navegando a formulario');
-  this.router.navigate(['/admin/distribution/schedule/new']);
-}
+  addNewSchedule() {
+    console.log('Navegando a formulario');
+    this.router.navigate(['/admin/distribution/schedule/new']);
+  }
 
 
   getStatusClass(status: string): string {
