@@ -9,6 +9,9 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class ProgramsService {
+  getNextProgramCode() {
+    throw new Error('Method not implemented.');
+  }
 
   private readonly apiPrograms = `${environment.distribution}/programs`;
 

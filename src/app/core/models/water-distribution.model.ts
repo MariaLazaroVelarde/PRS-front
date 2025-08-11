@@ -1,6 +1,8 @@
 
 // distribution programas
 export interface DistributionProgram {
+  zoneId: any;
+  streetIds: any;
   id: string;
   organizationId: string;
   programCode: string;

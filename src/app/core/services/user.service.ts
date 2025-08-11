@@ -18,6 +18,9 @@ import {
      providedIn: 'root'
 })
 export class UserService {
+     getCurrentUser() {
+       throw new Error('Method not implemented.');
+     }
 
      constructor(
           private apiService: ApiService,

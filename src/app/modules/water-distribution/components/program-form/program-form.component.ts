@@ -5,12 +5,15 @@ import { CommonModule } from '@angular/common';
 import { DistributionProgram } from '../../../../core/models/water-distribution.model';
 import { routes as Route, schedules as Schedule } from '../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../core/services/distribution.service';
-import { User as ResponsibleUser, UserResponseDTO } from '../../../../core/models/user.model';
-import { UserService } from '../../../../core/services/user.service';
-import { organization as Organization } from '../../../../core/models/organization.model';
+import { UserResponseDTO } from '../../../../core/models/user.model';
+import { organization as Organization, zones as Zone, street as Street } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import Swal from 'sweetalert2';
 import { ProgramsService } from '../../../../core/services/water-distribution.service';
+import { UserService } from 'app/core/services/user.service';
+import { Observable, forkJoin } from 'rxjs';
+import { switchMap, take, tap } from 'rxjs/operators';
+import { OrganizationContextService } from 'app/core/services/organization-context.service';
 
 @Component({
   selector: 'app-program-form',
@@ -25,21 +28,29 @@ export class ProgramFormComponent implements OnInit {
   isViewMode = false;
   isSubmitting = false;
   programId: string | null = null;
+
   organizations: Organization[] = [];
+  zones: Zone[] = [];
+  streets: Street[] = [];
+  filteredStreets: Street[] = [];
+  selectedZoneId: string | null = null;
+
   routes: Route[] = [];
   schedules: Schedule[] = [];
   responsible: UserResponseDTO[] = [];
   minDateTime: string = '';
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private programsService: ProgramsService,
-    private distributionService: DistributionService,
-    private userService: UserService,
-    private organizationService: OrganizationService
-  ) {
+  private fb: FormBuilder,
+  private route: ActivatedRoute,
+  private router: Router,
+  private programsService: ProgramsService,
+  private distributionService: DistributionService,
+  private userService: UserService,
+  private organizationService: OrganizationService,
+  private organizationContextService: OrganizationContextService 
+)
+{
     this.programsForm = this.fb.group({
       programCode: ['', [Validators.required, Validators.maxLength(20)]],
       programDate: ['', Validators.required],
@@ -47,48 +58,109 @@ export class ProgramFormComponent implements OnInit {
       plannedEndTime: ['', Validators.required],
       actualStartTime: [''],
       actualEndTime: [''],
-      organizationId: ['', Validators.required],
-      routeId: ['', Validators.required],
-      scheduleId: ['', Validators.required],
-      responsibleUserId: ['', Validators.required],
-      status: ['', Validators.required],
       observations: ['', [
         Validators.maxLength(300),
         Validators.pattern(/^[A-Za-zÁÉÍÓÚáéíóúÑñ][A-Za-zÁÉÍÓÚáéíóúÑñ ]*$/)
-      ]]
+      ]],
+      organizationId: ['', Validators.required],
+      zoneId: [''],
+      streetId: [[], Validators.required],
+      routeId: ['', Validators.required],
+      scheduleId: ['', Validators.required],
+      responsibleUserId: ['', Validators.required],
+      status: ['', Validators.required]
     });
   }
 
-  ngOnInit(): void {
-    this.programId = this.route.snapshot.paramMap.get('id');
-    const view = this.route.snapshot.data['viewMode'];
+ ngOnInit(): void {
+  this.programId = this.route.snapshot.paramMap.get('id');
+  const view = this.route.snapshot.data['viewMode'];
 
-    this.minDateTime = this.getTodayDateTime();
-    this.isViewMode = !!view;
-    this.isEditMode = !!this.programId && !view;
+  this.minDateTime = this.getTodayDateTime();
+  this.isViewMode = !!view;
+  this.isEditMode = !!this.programId && !view;
 
-    this.loadInitialData();
+  // Cargar datos iniciales
+  this.loadInitialData().subscribe(() => {
 
-    if (this.programId) {
-      this.loadProgram();
-    } else {
+    // ✅ Generar código si es nuevo
+    if (!this.isEditMode) {
       this.generateProgramCode();
+    } else {
+      this.loadProgram();
     }
-  }
+
+    // Tomar el primer valor del contexto
+    this.organizationContextService.organizationContext$
+      .pipe(take(1))
+      .subscribe((ctx: any) => {
+        console.log("📌 Contexto inicial:", ctx);
+
+        if (ctx?.organizationId) {
+          this.setOrganization(ctx.organizationId);
+        }
+      });
+
+    // Escuchar cambios posteriores
+    this.organizationContextService.organizationContext$
+      .subscribe((ctx: any) => {
+        console.log("📌 Contexto cambiado:", ctx);
+        if (ctx?.organizationId) {
+          this.setOrganization(ctx.organizationId);
+        }
+      });
+  });
+
+  // Cambios de zona → calles
+  this.programsForm.get('zoneId')?.valueChanges.subscribe(zoneId => {
+    const selectedZone = this.zones.find(z => z.zoneId === zoneId);
+    this.streets = (selectedZone?.streets as Street[]) || [];
+  });
+}
+
+private setOrganization(orgId: string) {
+  this.programsForm.patchValue({ organizationId: orgId });
+  this.programsForm.get('organizationId')?.disable();
+
+  const selectedOrg = this.organizations.find(o => o.organizationId === orgId);
+  this.zones = ((selectedOrg?.zones as unknown) as Zone[]) || [];
+}
 
   private getTodayDateTime(): string {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
+    return now.toISOString().slice(0, 16);
+  } 
 
-  private generateProgramCode(): void {
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    this.programsForm.patchValue({ programCode: `PRG${random}` });
+private generateProgramCode(): void {
+  this.programsService.getAllPrograms().pipe(take(1)).subscribe(programs => {
+    // Buscar el mayor número actual
+    const maxNumber = programs
+      .map((p: any) => parseInt(p.programCode.replace('PRG', ''), 10))
+      .filter(n => !isNaN(n) && n <= 20) // Solo contamos hasta el 20
+      .reduce((a, b) => Math.max(a, b), 0);
+
+    let nextNumber = maxNumber + 1;
+
+    
+    if (nextNumber > 20) {
+      nextNumber = 1;
+    }
+
+    const code = `PRG${nextNumber.toString().padStart(3, '0')}`;
+    this.programsForm.patchValue({ programCode: code });
+    this.programsForm.get('programCode')?.disable();
+  });
+}
+
+
+  onZoneChange(event: Event): void {
+    const zoneId = (event.target as HTMLSelectElement).value;
+    this.selectedZoneId = zoneId || null;
+
+    const selectedZone = this.zones.find(z => z.zoneId === zoneId);
+    this.filteredStreets = selectedZone?.streets || [];
+
+    this.programsForm.patchValue({ streetId: '' });
   }
 
   isFormValid(): boolean {
@@ -100,6 +172,7 @@ export class ProgramFormComponent implements OnInit {
     if (!field || !field.errors) return '';
     if (field.errors['required']) return 'Este campo es requerido';
     if (field.errors['maxlength']) return `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
+    if (field.errors['pattern']) return 'Formato inválido';
     return 'Campo inválido';
   }
 
@@ -117,11 +190,11 @@ export class ProgramFormComponent implements OnInit {
     this.isSubmitting = true;
     const formData: DistributionProgram = this.prepareFormData();
 
-    const request = this.isEditMode
+    const request$ = this.isEditMode
       ? this.programsService.updateProgram(this.programId!, formData)
       : this.programsService.createProgram(formData);
 
-    request.subscribe({
+    request$.subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
@@ -129,19 +202,17 @@ export class ProgramFormComponent implements OnInit {
           text: this.isEditMode
             ? 'El programa de distribución se actualizó correctamente.'
             : 'El programa de distribución se creó correctamente.',
-          confirmButtonText: 'Aceptar'
         }).then(() => {
-          this.router.navigate(['/admin/distribution/programs']);
+          this.router.navigate(['/admin/programs']);
         });
       },
       error: (error) => {
-        this.isSubmitting = false;
         console.error('❌ Error al guardar programa:', error);
+        this.isSubmitting = false;
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Ocurrió un error al guardar el programa.',
-          confirmButtonText: 'Cerrar'
+          text: 'Ocurrió un error al guardar el programa.'
         });
       }
     });
@@ -155,94 +226,54 @@ export class ProgramFormComponent implements OnInit {
     Object.values(formGroup.controls).forEach(control => control.markAsTouched());
   }
 
-  private formatDateOnly(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toISOString().split('T')[0];
-  }
-
-  private formatTimeOnly(datetime: string): string {
-    if (!datetime) return '';
-    const date = new Date(datetime);
-    if (isNaN(date.getTime())) return '';
-    return date.toTimeString().slice(0, 5);
-  }
-
-  private toDatetimeLocal(date: string, time: string = '00:00'): string {
-    if (!date || !time) return '';
-    return `${date}T${time}`;
-  }
-
   private prepareFormData(): any {
-    const form = this.programsForm.value;
-    const programDate = this.formatDateOnly(form.programDate);
+    const raw = this.programsForm.value;
 
-    const base = {
-      programCode: form.programCode,
-      programDate,
-      plannedStartTime: this.formatTimeOnly(form.plannedStartTime),
-      plannedEndTime: this.formatTimeOnly(form.plannedEndTime),
-      actualStartTime: form.actualStartTime ? this.formatTimeOnly(form.actualStartTime) : null,
-      actualEndTime: form.actualEndTime ? this.formatTimeOnly(form.actualEndTime) : null,
-      organizationId: form.organizationId,
-      routeId: form.routeId || null,
-      scheduleId: form.scheduleId || null,
-      responsibleUserId: form.responsibleUserId || null,
-      status: form.status,
-      observations: form.observations
+    let formattedDate = raw.programDate;
+    if (formattedDate && formattedDate.includes('T')) {
+      formattedDate = formattedDate.split('T')[0];
+    }
+
+    let streets = raw.streetId;
+    if (!Array.isArray(streets)) {
+      streets = streets ? [streets] : [];
+    }
+
+    return {
+      ...raw,
+      programDate: formattedDate,
+      streetId: streets
     };
-
-    return this.isEditMode ? { ...base, id: this.programId! } : base;
   }
 
   private loadProgram(): void {
     this.programsService.getProgramById(this.programId!).subscribe({
       next: (program) => {
-        const dateOnly = program.programDate;
-
-        this.programsForm.patchValue({
-          programCode: program.programCode,
-          programDate: this.toDatetimeLocal(dateOnly),
-          plannedStartTime: this.toDatetimeLocal(dateOnly, program.plannedStartTime),
-          plannedEndTime: this.toDatetimeLocal(dateOnly, program.plannedEndTime),
-          actualStartTime: program.actualStartTime ? this.toDatetimeLocal(dateOnly, program.actualStartTime) : '',
-          actualEndTime: program.actualEndTime ? this.toDatetimeLocal(dateOnly, program.actualEndTime) : '',
-          organizationId: program.organizationId,
-          routeId: program.routeId,
-          scheduleId: program.scheduleId,
-          responsibleUserId: program.responsibleUserId,
-          status: program.status,
-          observations: program.observations
-        });
-
-        if (this.isViewMode) {
-          this.programsForm.disable();
+        this.programsForm.patchValue(program);
+        if (program.zoneId) {
+          this.filteredStreets = this.streets.filter(s => s.zoneId === program.zoneId);
+          this.selectedZoneId = program.zoneId;
         }
+        if (this.isViewMode) this.programsForm.disable();
       },
-      error: (error) => {
-        console.error('Error al cargar programa:', error);
-      }
+      error: (err) => console.error('Error al cargar programa:', err)
     });
   }
 
-  private loadInitialData(): void {
-    this.organizationService.getAllOrganization().subscribe({
-      next: (orgs) => (this.organizations = orgs),
-      error: (err) => console.error('Error cargando organizaciones:', err)
-    });
+ private loadInitialData(): Observable<any> {
+  return forkJoin({
+    orgs: this.organizationService.getAllOrganization(),
+    routes: this.distributionService.getAllR(),
+    schedules: this.distributionService.getAll(),
+    users: this.userService.getAllUsers()
+  }).pipe(
+    tap(({ orgs, routes, schedules, users }) => {
+      this.organizations = orgs;
+      this.routes = routes;
+      this.schedules = schedules;
+      this.responsible = users;
+    })
+  );
+}
 
-    this.distributionService.getAllR().subscribe({
-      next: (routes) => (this.routes = routes),
-      error: (err) => console.error('Error cargando rutas:', err)
-    });
-
-    this.distributionService.getAll().subscribe({
-      next: (schedules) => (this.schedules = schedules),
-      error: (err) => console.error('Error cargando horarios:', err)
-    });
-
-    this.userService.getAllUsers().subscribe({
-      next: (res) => (this.responsible = res),
-      error: (err) => console.error('Error cargando responsables:', err)
-    });
-  }
 }

@@ -1,4 +1,5 @@
 export interface organization{
+      zones: organization | undefined;
       organizationId:string;
       organizationCode:string;
       organizationName:string;
@@ -26,6 +27,7 @@ export interface organizationUpdate{
 
 // Zones
 export interface zones{
+      streets: street[];
       zoneId: string,
       organizationId: string,
       zoneCode: string,

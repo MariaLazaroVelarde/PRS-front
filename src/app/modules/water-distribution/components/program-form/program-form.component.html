@@ -83,6 +83,42 @@
               </select>
               <p *ngIf="getFieldError('organizationId')" class="mt-1 text-sm text-red-600">{{ getFieldError('organizationId') }}</p>
             </div>
+             
+            <!-- Select de Zonas -->
+<div>
+  <label for="zoneId" class="block text-sm font-medium text-gray-700">Zona</label>
+  <select id="zoneId" formControlName="zoneId"
+    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3
+           focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+    (change)="onZoneChange($event)"
+    [disabled]="isViewMode">
+    <option value="">-- Selecciona una zona --</option>
+    <option *ngFor="let zone of zones" [value]="zone.zoneId">
+      {{ zone.zoneName }}
+    </option>
+  </select>
+  <p *ngIf="getFieldError('zoneId')" class="mt-1 text-sm text-red-600">
+    {{ getFieldError('zoneId') }}
+  </p>
+</div>
+
+<!-- Select de Calles -->
+<div>
+  <label for="streetId" class="block text-sm font-medium text-gray-700">Calle</label>
+  <select id="streetId" formControlName="streetId"
+    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3
+           focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+    [disabled]="isViewMode || !selectedZoneId">
+    <option value="">-- Selecciona una calle --</option>
+    <option *ngFor="let street of filteredStreets" [value]="street.streetId">
+      {{ street.streetName }}
+    </option>
+  </select>
+  <p *ngIf="getFieldError('streetId')" class="mt-1 text-sm text-red-600">
+    {{ getFieldError('streetId') }}
+  </p>
+</div>
+
 
             <!-- Ruta -->
             <div>
