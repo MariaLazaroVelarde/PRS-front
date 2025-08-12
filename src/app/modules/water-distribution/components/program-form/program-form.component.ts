@@ -72,7 +72,7 @@ export class ProgramFormComponent implements OnInit {
     });
   }
 
- ngOnInit(): void {
+ngOnInit(): void {
   this.programId = this.route.snapshot.paramMap.get('id');
   const view = this.route.snapshot.data['viewMode'];
 
@@ -83,32 +83,31 @@ export class ProgramFormComponent implements OnInit {
   // Cargar datos iniciales
   this.loadInitialData().subscribe(() => {
 
-    // ✅ Generar código si es nuevo
     if (!this.isEditMode) {
+      // ✅ Generar código y tomar organización del contexto SOLO en creación
       this.generateProgramCode();
+
+      this.organizationContextService.organizationContext$
+        .pipe(take(1))
+        .subscribe((ctx: any) => {
+          console.log("📌 Contexto inicial:", ctx);
+          if (ctx?.organizationId) {
+            this.setOrganization(ctx.organizationId);
+          }
+        });
+
+      this.organizationContextService.organizationContext$
+        .subscribe((ctx: any) => {
+          console.log("📌 Contexto cambiado:", ctx);
+          if (ctx?.organizationId) {
+            this.setOrganization(ctx.organizationId);
+          }
+        });
+
     } else {
+      // ✅ En edición, solo cargamos los datos del programa
       this.loadProgram();
     }
-
-    // Tomar el primer valor del contexto
-    this.organizationContextService.organizationContext$
-      .pipe(take(1))
-      .subscribe((ctx: any) => {
-        console.log("📌 Contexto inicial:", ctx);
-
-        if (ctx?.organizationId) {
-          this.setOrganization(ctx.organizationId);
-        }
-      });
-
-    // Escuchar cambios posteriores
-    this.organizationContextService.organizationContext$
-      .subscribe((ctx: any) => {
-        console.log("📌 Contexto cambiado:", ctx);
-        if (ctx?.organizationId) {
-          this.setOrganization(ctx.organizationId);
-        }
-      });
   });
 
   // Cambios de zona → calles
@@ -119,31 +118,38 @@ export class ProgramFormComponent implements OnInit {
 }
 
 private setOrganization(orgId: string) {
-  this.programsForm.patchValue({ organizationId: orgId });
-  this.programsForm.get('organizationId')?.disable();
+  const orgControl = this.programsForm.get('organizationId');
+  orgControl?.patchValue(orgId, { emitEvent: false });
+  orgControl?.disable({ emitEvent: false });
 
   const selectedOrg = this.organizations.find(o => o.organizationId === orgId);
-  this.zones = ((selectedOrg?.zones as unknown) as Zone[]) || [];
+
+  // Solo asigna si realmente es un array de zonas
+  this.zones = Array.isArray(selectedOrg?.zones)
+    ? selectedOrg?.zones as Zone[]
+    : [];
 }
+
 
   private getTodayDateTime(): string {
     const now = new Date();
     return now.toISOString().slice(0, 16);
   } 
 
+  
 private generateProgramCode(): void {
   this.programsService.getAllPrograms().pipe(take(1)).subscribe(programs => {
-    // Buscar el mayor número actual
-    const maxNumber = programs
-      .map((p: any) => parseInt(p.programCode.replace('PRG', ''), 10))
-      .filter(n => !isNaN(n) && n <= 20) // Solo contamos hasta el 20
-      .reduce((a, b) => Math.max(a, b), 0);
+    const usedNumbers = programs
+      .map((p: any) => {
+        const num = parseInt(p.programCode.replace('PRG', ''), 10);
+        return isNaN(num) ? 0 : num;
+      })
+      .filter(n => n >= 1 && n <= 20);
 
-    let nextNumber = maxNumber + 1;
-
-    
-    if (nextNumber > 20) {
-      nextNumber = 1;
+    let nextNumber = 1;
+    if (usedNumbers.length > 0) {
+      const maxNumber = Math.max(...usedNumbers);
+      nextNumber = maxNumber >= 20 ? 1 : maxNumber + 1;
     }
 
     const code = `PRG${nextNumber.toString().padStart(3, '0')}`;
@@ -151,6 +157,7 @@ private generateProgramCode(): void {
     this.programsForm.get('programCode')?.disable();
   });
 }
+
 
 
   onZoneChange(event: Event): void {
@@ -227,38 +234,48 @@ private generateProgramCode(): void {
   }
 
   private prepareFormData(): any {
-    const raw = this.programsForm.value;
+  const raw = this.programsForm.getRawValue(); // Incluye controles deshabilitados
 
-    let formattedDate = raw.programDate;
-    if (formattedDate && formattedDate.includes('T')) {
-      formattedDate = formattedDate.split('T')[0];
-    }
-
-    let streets = raw.streetId;
-    if (!Array.isArray(streets)) {
-      streets = streets ? [streets] : [];
-    }
-
-    return {
-      ...raw,
-      programDate: formattedDate,
-      streetId: streets
-    };
+  let formattedDate = raw.programDate;
+  if (formattedDate && formattedDate.includes('T')) {
+    formattedDate = formattedDate.split('T')[0];
   }
 
-  private loadProgram(): void {
-    this.programsService.getProgramById(this.programId!).subscribe({
-      next: (program) => {
-        this.programsForm.patchValue(program);
-        if (program.zoneId) {
-          this.filteredStreets = this.streets.filter(s => s.zoneId === program.zoneId);
-          this.selectedZoneId = program.zoneId;
-        }
-        if (this.isViewMode) this.programsForm.disable();
-      },
-      error: (err) => console.error('Error al cargar programa:', err)
-    });
+  let streets = raw.streetId;
+  if (!Array.isArray(streets)) {
+    streets = streets ? [streets] : [];
   }
+
+  return {
+    ...raw,
+    programDate: formattedDate,
+    streetId: streets
+  };
+}
+
+private loadProgram(): void {
+  this.programsService.getProgramById(this.programId!).subscribe({
+    next: (program) => {
+      this.programsForm.patchValue(program);
+
+      // 🔹 Forzar carga de zonas y calles al editar
+      if (program.organizationId) {
+        this.setOrganization(program.organizationId);
+      }
+
+      if (program.zoneId) {
+        this.filteredStreets = this.zones.find(z => z.zoneId === program.zoneId)?.streets || [];
+        this.selectedZoneId = program.zoneId;
+      }
+
+      if (this.isViewMode) {
+        this.programsForm.disable();
+      }
+    },
+    error: (err) => console.error('Error al cargar programa:', err)
+  });
+}
+
 
  private loadInitialData(): Observable<any> {
   return forkJoin({

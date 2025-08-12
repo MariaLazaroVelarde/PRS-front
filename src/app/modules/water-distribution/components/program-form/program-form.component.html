@@ -75,7 +75,7 @@
               <label for="organizationId" class="block text-sm font-medium text-gray-700">Organización <span class="text-red-500">*</span></label>
               <select id="organizationId" formControlName="organizationId"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                [disabled]="isViewMode">
+                [disabled]="isViewMode || programsForm.get('organizationId')?.disabled">
                 <option value="">Seleccionar organización</option>
                 <option *ngFor="let org of organizations" [value]="org.organizationId">
                   {{ org.organizationName }}
