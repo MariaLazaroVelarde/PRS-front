@@ -18,6 +18,7 @@ import { routes, schedules } from '../../../../core/models/distribution.model';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
+
 export class ProgramListComponent implements OnInit {
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
@@ -39,6 +40,20 @@ export class ProgramListComponent implements OnInit {
   alertMessage = '';
   searchTerm = '';
   selectedStatus = 'todos';
+  showModal = false;
+isViewMode = false;
+selectedProgramId?: string;
+
+openProgramModal(programId: string, viewMode: boolean) {
+  this.selectedProgramId = programId;
+  this.isViewMode = viewMode;
+  this.showModal = true;
+}
+
+closeModal() {
+  this.showModal = false;
+}
+
 
   constructor(
     private programsService: ProgramsService,
@@ -70,6 +85,17 @@ export class ProgramListComponent implements OnInit {
       }
     });
   }
+
+  public toPeruTime(isoString: string): string {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  return date.toLocaleTimeString('es-PE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Lima'
+  });
+}
 
   private loadRoutes(): void {
     this.distributionService.getAllR().subscribe({

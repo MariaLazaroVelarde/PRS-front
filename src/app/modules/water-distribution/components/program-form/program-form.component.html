@@ -42,48 +42,55 @@
         <div class="p-4">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <!-- Campos generales -->
-            <ng-container *ngFor="let field of [
-              { id: 'programCode', label: 'Código del Programa', type: 'text', required: true },
-              { id: 'programDate', label: 'Fecha', type: 'datetime-local', required: true },
-              { id: 'plannedStartTime', label: 'Hora Planificada Inicio', type: 'datetime-local', required: true },
-              { id: 'plannedEndTime', label: 'Hora Planificada Fin', type: 'datetime-local', required: true },
-              { id: 'actualStartTime', label: 'Hora Real Inicio', type: 'datetime-local' },
-              { id: 'actualEndTime', label: 'Hora Real Fin', type: 'datetime-local' },
-              { id: 'observations', label: 'Observaciones', type: 'text' }
-            ]">
-              <div>
-                <label [for]="field.id" class="block text-sm font-medium text-gray-700">
-                  {{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span>
-                </label>
-                <input [type]="field.type"
-                       [id]="field.id"
-                       [formControlName]="field.id"
-                       class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                       [ngClass]="{ 'border-red-300': isFieldInvalid(field.id) }"
-                       [readonly]="isViewMode"
-                       [disabled]="isViewMode"
-                       [attr.min]="field.type === 'datetime-local' ? minDateTime : null"
-                />
-                <p *ngIf="getFieldError(field.id)" class="mt-1 text-sm text-red-600">
-                  {{ getFieldError(field.id) }}
-                </p>
-              </div>
-            </ng-container>
+           <ng-container *ngFor="let field of [
+  { id: 'programCode', label: 'Código del Programa', type: 'text', required: true },
+  { id: 'programDate', label: 'Fecha', type: 'date', required: true },
+  { id: 'plannedStartTime', label: 'Hora Planificada Inicio', type: 'time', required: true },
+  { id: 'plannedEndTime', label: 'Hora Planificada Fin', type: 'time', required: true },
+  { id: 'actualStartTime', label: 'Hora Real Inicio', type: 'time' },
+  { id: 'actualEndTime', label: 'Hora Real Fin', type: 'time' },
+  { id: 'observations', label: 'Observaciones', type: 'text' }
+]">
+  <div>
+    <label [for]="field.id" class="block text-sm font-medium text-gray-700">
+      {{ field.label }} <span *ngIf="field.required" class="text-red-500">*</span>
+    </label>
+    <input 
+      [type]="field.type"
+      [id]="field.id"
+      [formControlName]="field.id"
+      class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
+             focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+      [ngClass]="{ 'border-red-300': isFieldInvalid(field.id) }"
+      [readonly]="isViewMode"
+      [disabled]="isViewMode"
+      [attr.min]="field.type === 'datetime-local' ? minDateTime : null"
+    />
+    <p *ngIf="getFieldError(field.id)" class="mt-1 text-sm text-red-600">
+      {{ getFieldError(field.id) }}
+    </p>
+  </div>
+</ng-container>
 
-            <!-- Organización -->
-            <div>
-              <label for="organizationId" class="block text-sm font-medium text-gray-700">Organización <span class="text-red-500">*</span></label>
-              <select id="organizationId" formControlName="organizationId"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                [disabled]="isViewMode || programsForm.get('organizationId')?.disabled">
-                <option value="">Seleccionar organización</option>
-                <option *ngFor="let org of organizations" [value]="org.organizationId">
-                  {{ org.organizationName }}
-                </option>
-              </select>
-              <p *ngIf="getFieldError('organizationId')" class="mt-1 text-sm text-red-600">{{ getFieldError('organizationId') }}</p>
-            </div>
-             
+<!-- Organización -->
+<div>
+  <label for="organizationId" class="block text-sm font-medium text-gray-700">
+    Organización <span class="text-red-500">*</span>
+  </label>
+  <select id="organizationId" formControlName="organizationId"
+    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
+           focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+    [disabled]="isViewMode || !!programsForm.get('organizationId')?.disabled">
+    <option value="">Seleccionar organización</option>
+    <option *ngFor="let org of organizations" [value]="org.organizationId">
+      {{ org.organizationName }}
+    </option>
+  </select>
+  <p *ngIf="getFieldError('organizationId')" class="mt-1 text-sm text-red-600">
+    {{ getFieldError('organizationId') }}
+  </p>
+</div>
+
             <!-- Select de Zonas -->
 <div>
   <label for="zoneId" class="block text-sm font-medium text-gray-700">Zona</label>

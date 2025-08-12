@@ -24,6 +24,7 @@ import { OrganizationContextService } from 'app/core/services/organization-conte
 })
 export class ProgramFormComponent implements OnInit {
   programsForm: FormGroup;
+  showModal = false;
   isEditMode = false;
   isViewMode = false;
   isSubmitting = false;
@@ -83,31 +84,41 @@ ngOnInit(): void {
   // Cargar datos iniciales
   this.loadInitialData().subscribe(() => {
 
-    if (!this.isEditMode) {
-      // ✅ Generar código y tomar organización del contexto SOLO en creación
-      this.generateProgramCode();
+  if (!this.isEditMode) {
+  // ✅ Establecer fecha/hora actual en hora de Perú
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const peruTime = new Date(utc - (5 * 60 * 60000)); // UTC-5
+  const formattedPeruTime = peruTime.toISOString().slice(0, 16);
+  this.programsForm.patchValue({ programDate: formattedPeruTime });
+  this.programsForm.get('programDate')?.disable();
 
-      this.organizationContextService.organizationContext$
-        .pipe(take(1))
-        .subscribe((ctx: any) => {
-          console.log("📌 Contexto inicial:", ctx);
-          if (ctx?.organizationId) {
-            this.setOrganization(ctx.organizationId);
-          }
-        });
+  // ✅ Generar código
+  this.generateProgramCode();
 
-      this.organizationContextService.organizationContext$
-        .subscribe((ctx: any) => {
-          console.log("📌 Contexto cambiado:", ctx);
-          if (ctx?.organizationId) {
-            this.setOrganization(ctx.organizationId);
-          }
-        });
+  // ✅ Tomar organización del contexto
+  this.organizationContextService.organizationContext$
+    .pipe(take(1))
+    .subscribe((ctx: any) => {
+      console.log("📌 Contexto inicial:", ctx);
+      if (ctx?.organizationId) {
+        this.setOrganization(ctx.organizationId);
+      }
+    });
 
-    } else {
-      // ✅ En edición, solo cargamos los datos del programa
-      this.loadProgram();
-    }
+  this.organizationContextService.organizationContext$
+    .subscribe((ctx: any) => {
+      console.log("📌 Contexto cambiado:", ctx);
+      if (ctx?.organizationId) {
+        this.setOrganization(ctx.organizationId);
+      }
+    });
+
+} else {
+  // ✅ En edición, solo cargamos los datos del programa
+  this.loadProgram();
+}
+
   });
 
   // Cambios de zona → calles
@@ -252,28 +263,57 @@ private generateProgramCode(): void {
     streetId: streets
   };
 }
-
 private loadProgram(): void {
   this.programsService.getProgramById(this.programId!).subscribe({
     next: (program) => {
+      // Asegurar fecha
+      if (program.programDate) {
+        program.programDate = program.programDate;
+      }
+
+      // Formatear horas
+      const formatTime = (timeStr: string | null | undefined) =>
+        timeStr ? timeStr.substring(0, 5) : '';
+
+      program.plannedStartTime = formatTime(program.plannedStartTime);
+      program.plannedEndTime   = formatTime(program.plannedEndTime);
+      program.actualStartTime  = formatTime(program.actualStartTime);
+      program.actualEndTime    = formatTime(program.actualEndTime);
+
+      // Adaptar streetId si viene como array
+      if (Array.isArray(program.streetId)) {
+        program.streetId = program.streetId[0] || '';
+      }
+
+      // Cargar al formulario
       this.programsForm.patchValue(program);
 
-      // 🔹 Forzar carga de zonas y calles al editar
+      // Cargar zonas y calles
       if (program.organizationId) {
         this.setOrganization(program.organizationId);
       }
-
       if (program.zoneId) {
         this.filteredStreets = this.zones.find(z => z.zoneId === program.zoneId)?.streets || [];
         this.selectedZoneId = program.zoneId;
       }
 
+      // Desactivar formulario en modo vista
       if (this.isViewMode) {
         this.programsForm.disable();
+      } else {
+        this.programsForm.enable();
       }
     },
     error: (err) => console.error('Error al cargar programa:', err)
   });
+}
+
+
+openProgramModal(programId: string, viewMode: boolean = false): void {
+  this.programId = programId;
+  this.isViewMode = viewMode;
+  this.loadProgram();
+  this.showModal = true; // 👈 bandera para mostrar modal
 }
 
 

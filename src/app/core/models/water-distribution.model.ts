@@ -2,7 +2,7 @@
 // distribution programas
 export interface DistributionProgram {
   zoneId: any;
-  streetIds: any;
+  streetId: any;
   id: string;
   organizationId: string;
   programCode: string;
@@ -38,4 +38,5 @@ export enum ProgramStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED'
 }
+
 
