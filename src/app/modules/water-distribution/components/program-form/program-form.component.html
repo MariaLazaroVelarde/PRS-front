@@ -45,10 +45,12 @@
            <ng-container *ngFor="let field of [
   { id: 'programCode', label: 'Código del Programa', type: 'text', required: true },
   { id: 'programDate', label: 'Fecha', type: 'date', required: true },
-  { id: 'plannedStartTime', label: 'Hora Planificada Inicio', type: 'time', required: true },
-  { id: 'plannedEndTime', label: 'Hora Planificada Fin', type: 'time', required: true },
-  { id: 'actualStartTime', label: 'Hora Real Inicio', type: 'time' },
-  { id: 'actualEndTime', label: 'Hora Real Fin', type: 'time' },
+{ id: 'plannedStartTime', label: 'Hora Planificada Inicio', type: 'time', required: true },
+{ id: 'plannedEndTime', label: 'Hora Planificada Fin', type: 'time', required: true, greaterThan: 'plannedStartTime' },
+
+{ id: 'actualStartTime', label: 'Hora Real Inicio', type: 'time' },
+{ id: 'actualEndTime', label: 'Hora Real Fin', type: 'time', greaterThan: 'actualStartTime' },
+
   { id: 'observations', label: 'Observaciones', type: 'text' }
 ]">
   <div>

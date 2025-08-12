@@ -18,7 +18,6 @@ import { routes, schedules } from '../../../../core/models/distribution.model';
   standalone: true,
   imports: [CommonModule, FormsModule]
 })
-
 export class ProgramListComponent implements OnInit {
   programs: DistributionProgram[] = [];
   filteredPrograms: DistributionProgram[] = [];
@@ -40,20 +39,12 @@ export class ProgramListComponent implements OnInit {
   alertMessage = '';
   searchTerm = '';
   selectedStatus = 'todos';
+
+  // Modal
   showModal = false;
-isViewMode = false;
-selectedProgramId?: string;
-
-openProgramModal(programId: string, viewMode: boolean) {
-  this.selectedProgramId = programId;
-  this.isViewMode = viewMode;
-  this.showModal = true;
-}
-
-closeModal() {
-  this.showModal = false;
-}
-
+  isViewMode = false;
+  selectedProgramId?: string;
+  selectedProgram: DistributionProgram | null = null;
 
   constructor(
     private programsService: ProgramsService,
@@ -61,7 +52,7 @@ closeModal() {
     private userService: UserService,
     private organizationService: OrganizationService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadPrograms();
@@ -87,15 +78,15 @@ closeModal() {
   }
 
   public toPeruTime(isoString: string): string {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  return date.toLocaleTimeString('es-PE', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: 'America/Lima'
-  });
-}
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Lima'
+    });
+  }
 
   private loadRoutes(): void {
     this.distributionService.getAllR().subscribe({
@@ -122,13 +113,10 @@ closeModal() {
   private loadUsers(): void {
     this.userService.getAllUsers().subscribe({
       next: (data: UserResponseDTO[]) => {
-        console.log('Usuarios recibidos:', data); // Verifica estructura
         this.users = data;
         this.userMap.clear();
-
         data.forEach(u => {
-          console.log('Mapeando usuario:', u.id, '->', u.fullName); // Asegúrate de usar 'id' si así viene del backend
-          this.userMap.set(u.id, u.fullName); // Mapear correctamente
+          this.userMap.set(u.id, u.fullName);
         });
       },
       error: (error: any) => console.error('Error al cargar usuarios:', error)
@@ -157,14 +145,11 @@ closeModal() {
   private filterPrograms(): void {
     this.filteredPrograms = this.programs.filter(program => {
       const searchTermLower = this.searchTerm.toLowerCase();
-
       const matchesSearch =
         program.programCode.toLowerCase().includes(searchTermLower) ||
-        program.programDate.toLowerCase().includes(searchTermLower)
-
+        program.programDate.toLowerCase().includes(searchTermLower);
       const matchesStatus = this.selectedStatus === 'todos' ||
         program.status === this.selectedStatus;
-
       return matchesSearch && matchesStatus;
     });
   }
@@ -182,9 +167,7 @@ closeModal() {
   }
 
   getResponsibleName(responsibleUserId: string): string {
-    const name = this.userMap.get(responsibleUserId);
-    console.log('Buscando responsable:', responsibleUserId, '=>', name);
-    return name || responsibleUserId;
+    return this.userMap.get(responsibleUserId) || responsibleUserId;
   }
 
   getOrganizationName(organizationId: string): string {
@@ -219,6 +202,20 @@ closeModal() {
     }
   }
 
+  // Modal
+  openProgramModal(programId: string, viewMode: boolean) {
+    this.selectedProgramId = programId;
+    this.isViewMode = viewMode;
+    this.selectedProgram = this.programs.find(p => p.id === programId) || null;
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedProgram = null;
+  }
+
+  // Navegación original (si la quieres mantener)
   viewProgramsDetail(id: string): void {
     this.router.navigate(['/admin/distribution/programs/view', id]);
   }

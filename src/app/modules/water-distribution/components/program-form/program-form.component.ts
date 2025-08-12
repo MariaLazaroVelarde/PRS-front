@@ -6,6 +6,7 @@ import { DistributionProgram } from '../../../../core/models/water-distribution.
 import { routes as Route, schedules as Schedule } from '../../../../core/models/distribution.model';
 import { DistributionService } from '../../../../core/services/distribution.service';
 import { UserResponseDTO } from '../../../../core/models/user.model';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { organization as Organization, zones as Zone, street as Street } from '../../../../core/models/organization.model';
 import { OrganizationService } from '../../../../core/services/organization.service';
 import Swal from 'sweetalert2';
@@ -22,6 +23,7 @@ import { OrganizationContextService } from 'app/core/services/organization-conte
   templateUrl: './program-form.component.html',
   styleUrls: ['./program-form.component.css']
 })
+
 export class ProgramFormComponent implements OnInit {
   programsForm: FormGroup;
   showModal = false;
@@ -71,6 +73,7 @@ export class ProgramFormComponent implements OnInit {
       responsibleUserId: ['', Validators.required],
       status: ['', Validators.required]
     });
+    
   }
 
 ngOnInit(): void {
@@ -106,6 +109,16 @@ ngOnInit(): void {
       }
     });
 
+     // 🔹 Validación: plannedEndTime > plannedStartTime
+  this.programsForm.get('plannedEndTime')?.valueChanges.subscribe(endTime => {
+    this.validateTime('plannedStartTime', 'plannedEndTime');
+  });
+
+  // 🔹 Validación: actualEndTime > actualStartTime
+  this.programsForm.get('actualEndTime')?.valueChanges.subscribe(endTime => {
+    this.validateTime('actualStartTime', 'actualEndTime');
+  });
+
   this.organizationContextService.organizationContext$
     .subscribe((ctx: any) => {
       console.log("📌 Contexto cambiado:", ctx);
@@ -126,6 +139,26 @@ ngOnInit(): void {
     const selectedZone = this.zones.find(z => z.zoneId === zoneId);
     this.streets = (selectedZone?.streets as Street[]) || [];
   });
+}
+private validateTime(startControlName: string, endControlName: string): void {
+  const startValue = this.programsForm.get(startControlName)?.value;
+  const endValue = this.programsForm.get(endControlName)?.value;
+
+  if (startValue && endValue) {
+    const startMinutes = this.toMinutes(startValue);
+    const endMinutes = this.toMinutes(endValue);
+
+    if (endMinutes <= startMinutes) {
+      this.programsForm.get(endControlName)?.setErrors({ timeInvalid: true });
+    } else {
+      this.programsForm.get(endControlName)?.setErrors(null);
+    }
+  }
+}
+
+private toMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
 }
 
 private setOrganization(orgId: string) {
@@ -170,7 +203,6 @@ private generateProgramCode(): void {
 }
 
 
-
   onZoneChange(event: Event): void {
     const zoneId = (event.target as HTMLSelectElement).value;
     this.selectedZoneId = zoneId || null;
@@ -180,6 +212,8 @@ private generateProgramCode(): void {
 
     this.programsForm.patchValue({ streetId: '' });
   }
+
+  
 
   isFormValid(): boolean {
     return this.programsForm.valid;
